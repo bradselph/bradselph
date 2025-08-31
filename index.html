@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Tone Player</title>
+    <title>Random Tone Player</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
@@ -21,19 +21,35 @@
             border: 2px solid #4a9eff;
             border-radius: 15px;
             background: rgba(74, 158, 255, 0.1);
-            min-width: 400px;
+            min-width: 420px;
         }
         .song-title {
-            font-size: 18px;
-            margin-bottom: 15px;
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 5px;
             color: #4a9eff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .song-title.show {
+            opacity: 1;
+        }
+        .song-file {
+            font-size: 13px;
+            color: #bbb;
+            margin-bottom: 15px;
         }
         .status {
-            font-size: 20px;
+            font-size: 18px;
             margin-bottom: 15px;
+            color: #eee;
         }
         .progress {
-            width: 300px;
+            width: 320px;
             height: 6px;
             background: #333;
             border-radius: 3px;
@@ -44,10 +60,10 @@
             height: 100%;
             background: #4a9eff;
             width: 0%;
-            transition: width 0.1s;
+            transition: width 0.15s;
         }
         .icon {
-            margin-right: 8px;
+            margin-right: 6px;
         }
         .controls {
             margin-top: 20px;
@@ -57,7 +73,7 @@
             border: none;
             color: white;
             padding: 8px 16px;
-            margin: 0 5px;
+            margin: 0 6px;
             border-radius: 5px;
             cursor: pointer;
             font-family: monospace;
@@ -72,15 +88,16 @@
 </head>
 <body>
     <div class="player">
-        <div class="song-title" id="songTitle">Loading tones...</div>
+        <div class="song-title" id="songTitle"><i class="bi bi-music-note-beamed"></i>Loading tones...</div>
+        <div class="song-file" id="songFile">Please wait</div>
         <div class="status" id="status"><i class="bi bi-hourglass-split icon"></i>Loading...</div>
         <div class="progress"><div class="bar" id="bar"></div></div>
         <div class="controls">
             <button class="btn" onclick="playRandomTone()">
-                <i class="bi bi-shuffle"></i> Random Tone
+                <i class="bi bi-shuffle"></i>Random Tone
             </button>
             <button class="btn" onclick="stopTone()">
-                <i class="bi bi-stop-fill"></i> Stop
+                <i class="bi bi-stop-fill"></i>Stop
             </button>
         </div>
         <div style="margin-top: 15px; font-size: 12px; color: #666;">
@@ -96,9 +113,13 @@
         let hasPlayed = false;
 
         const freq = {
-            'c': 261.63, 'c#': 279.07, 'd': 293.66, 'd#': 311.13, 'e': 329.63,
-            'f': 349.23, 'f#': 369.99, 'g': 392.00, 'g#': 415.30, 'a': 440.00,
-            'a#': 466.16, 'b': 493.88
+            'c': 261.63, 'c#': 279.07, 'db': 279.07,
+            'd': 293.66, 'd#': 311.13, 'eb': 311.13,
+            'e': 329.63,
+            'f': 349.23, 'f#': 369.99, 'gb': 369.99,
+            'g': 392.00, 'g#': 415.30, 'ab': 415.30,
+            'a': 440.00, 'a#': 466.16, 'bb': 466.16,
+            'b': 493.88
         };
 
         async function loadTonesList() {
@@ -109,29 +130,23 @@
                 if (tonesList.length > 0) {
                     document.getElementById('status').innerHTML = '<i class="bi bi-hand-index-fill icon"></i>Click to play random tone';
                     document.getElementById('songTitle').textContent = `${tonesList.length} tones loaded`;
-                    
-                    try {
-                        await playRandomTone();
-                    } catch (error) {
-                    }
+                    document.getElementById('songFile').textContent = 'Ready';
+                    document.getElementById('songTitle').classList.add('show');
+                    try { await playRandomTone(); } catch {}
                 } else {
                     throw new Error('No tones found');
                 }
-            } catch (error) {
+            } catch {
                 tonesList = [{
                     name: "Mockingbird",
                     file: "mockingbird.txt",
                     content: "Mockingb:d=4,o=5,b=90:8a,8b,16g6,16g6,8g6,8a6,8g6,8f#6,8f#6,16b,16b,8f#6,16f#6,16f#6,16g6,16f#6,e6,16b,16b,16b,16b,16b,16b,8e6,16b,16b,8b,16b,16g,8a,8b,16b,16b,16a,16g,8a,8b,16g,16f#,e,16b,16b,16b,16b,8b,8b,8g6,8g6,16g6,16a6,8g6,8f#6,8f#.6,16b,8f#6,16f#6,16f#6,16g6,16f#6,e6,16b,16b,16b,16b,16b,16b,8e6,8b,16b,16g,8a,8b,16b,16g,8a,8b,8a,16b,16f#,16g,16f#,2e"
                 }];
-                
                 document.getElementById('status').innerHTML = '<i class="bi bi-hand-index-fill icon"></i>Click to play';
-                document.getElementById('songTitle').textContent = 'Fallback tone loaded';
-                
-                try {
-                    await playRandomTone();
-                } catch (error) {
-
-                }
+                document.getElementById('songTitle').textContent = 'Fallback Tone';
+                document.getElementById('songFile').textContent = 'mockingbird';
+                document.getElementById('songTitle').classList.add('show');
+                try { await playRandomTone(); } catch {}
             }
         }
 
@@ -139,30 +154,30 @@
             try {
                 const response = await fetch(`tones/${filename}`);
                 return await response.text();
-            } catch (error) {
-                console.error('Error loading tone file:', error);
+            } catch {
                 return null;
             }
         }
 
         async function playRandomTone() {
             if (tonesList.length === 0) return;
-
             const randomTone = tonesList[Math.floor(Math.random() * tonesList.length)];
             
-            let toneContent;
-            if (randomTone.content) {
-                toneContent = randomTone.content;
-            } else {
-                toneContent = await loadToneFile(randomTone.file);
-                if (!toneContent) return;
-            }
-
+            let toneContent = randomTone.content ? randomTone.content : await loadToneFile(randomTone.file);
+            if (!toneContent) return;
             currentTone = toneContent.trim();
-            
-            document.getElementById('songTitle').textContent = randomTone.name;
+
+            const songTitle = document.getElementById('songTitle');
+            const songFile = document.getElementById('songFile');
+            songTitle.classList.remove('show');
+            setTimeout(() => {
+                songTitle.innerHTML = `<i class="bi bi-music-note-beamed"></i> ${randomTone.name}`;
+                let displayFile = randomTone.file ? randomTone.file.replace(/\.txt$/i, '') : "inline tone";
+                songFile.textContent = displayFile;
+                songTitle.classList.add('show');
+            }, 200);
+
             document.getElementById('status').innerHTML = '<i class="bi bi-play-fill icon"></i>Playing...';
-            
             await playTone(currentTone);
             hasPlayed = true;
         }
@@ -175,86 +190,135 @@
         }
 
         function getFreq(note, octave) {
-            const base = freq[note.toLowerCase()];
-            return base ? base * Math.pow(2, octave - 5) : 0;
+            if (!note) return 0;
+            
+            note = note.toLowerCase();
+            
+            const base = freq[note];
+            if (!base) return 0;
+            
+            octave = Math.max(0, Math.min(10, octave));
+            
+            return base * Math.pow(2, octave - 5);
         }
 
         function playNote(frequency, duration) {
-            if (!frequency) return;
-            const osc = audioContext.createOscillator();
-            const gain = audioContext.createGain();
-            osc.connect(gain);
-            gain.connect(audioContext.destination);
-            osc.frequency.value = frequency;
-            osc.type = 'square';
-            gain.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gain.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
-            osc.start();
-            osc.stop(audioContext.currentTime + duration);
+            if (!frequency || !audioContext) return;
+            
+            try {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.frequency.value = Math.max(20, Math.min(20000, frequency));
+                osc.type = 'square';
+                
+                const now = audioContext.currentTime;
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.1, now + 0.01);
+                gain.gain.linearRampToValueAtTime(0.1, now + duration - 0.01);
+                gain.gain.linearRampToValueAtTime(0, now + duration);
+                
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (error) {
+                console.warn('Error playing note:', error);
+            }
         }
 
         function parseRTTTL(rtttl) {
-            const parts = rtttl.split(':');
-            const [name, defaults, notes] = parts;
-            
-            let bpm = 120, defDur = 4, defOct = 5;
-            defaults.split(',').forEach(p => {
-                const [k, v] = p.split('=');
-                if (k === 'b') bpm = parseInt(v);
-                if (k === 'd') defDur = parseInt(v);
-                if (k === 'o') defOct = parseInt(v);
-            });
-
-            const result = [];
-            notes.split(',').forEach(token => {
-                token = token.trim();
-                if (!token) return;
-
-                let dur = defDur, oct = defOct, note = '';
-                
-                const durMatch = token.match(/^(\d+)/);
-                if (durMatch) {
-                    dur = parseInt(durMatch[1]);
-                    token = token.slice(durMatch[1].length);
+            try {
+                const parts = rtttl.split(':');
+                if (parts.length < 3) {
+                    throw new Error('Invalid RTTTL format');
                 }
                 
-                const noteMatch = token.match(/^([a-gp]#?)/i);
-                if (noteMatch) {
-                    note = noteMatch[1].toLowerCase();
-                    token = token.slice(noteMatch[1].length);
-                }
+                const [name, defaults, notes] = parts;
+                let bpm = 120, defDur = 4, defOct = 5;
                 
-                const octMatch = token.match(/^(\d)/);
-                if (octMatch) {
-                    oct = parseInt(octMatch[1]);
-                }
+                defaults.split(',').forEach(p => {
+                    const trimmed = p.trim();
+                    if (trimmed.includes('=')) {
+                        const [k, v] = trimmed.split('=');
+                        const key = k.trim().toLowerCase();
+                        const value = parseInt(v.trim());
+                        if (!isNaN(value)) {
+                            if (key === 'b') bpm = Math.max(1, value);
+                            if (key === 'd') defDur = Math.max(1, value);
+                            if (key === 'o') defOct = Math.max(0, Math.min(10, value));
+                        }
+                    }
+                });
+
+                const result = [];
+                const noteTokens = notes.split(',');
                 
-                const dots = (token.match(/\./g) || []).length;
-                let duration = (60 / bpm) * (4 / dur);
-                for (let i = 0; i < dots; i++) duration *= 1.5;
-
-                const frequency = note === 'p' ? 0 : getFreq(note, oct);
-                result.push({ frequency, duration });
-            });
-
-            return result;
+                noteTokens.forEach(token => {
+                    token = token.trim();
+                    if (!token) return;
+                    
+                    let dur = defDur, oct = defOct, note = '';
+                    let remainingToken = token;
+                    
+                    const durMatch = remainingToken.match(/^(\d+)/);
+                    if (durMatch) {
+                        dur = parseInt(durMatch[1]);
+                        remainingToken = remainingToken.slice(durMatch[1].length);
+                    }
+                    
+                    const noteMatch = remainingToken.match(/^([a-gpr]#?b?)/i);
+                    if (noteMatch) {
+                        note = noteMatch[1].toLowerCase();
+                        remainingToken = remainingToken.slice(noteMatch[1].length);
+                        
+                        if (note === 'r') note = 'p';
+                    }
+                    
+                    const octMatch = remainingToken.match(/^(\d+)/);
+                    if (octMatch) {
+                        oct = parseInt(octMatch[1]);
+                        remainingToken = remainingToken.slice(octMatch[1].length);
+                    }
+                    
+                    const dots = (remainingToken.match(/\./g) || []).length;
+                    
+                    let duration = (60 / bpm) * (4 / dur);
+                    for (let i = 0; i < dots; i++) {
+                        duration *= 1.5;
+                    }
+                    
+                    const frequency = (note === 'p' || note === 'r') ? 0 : getFreq(note, oct);
+                    
+                    result.push({ frequency, duration, note, octave: oct });
+                });
+                
+                return result;
+            } catch (error) {
+                console.error('Error parsing RTTTL:', error);
+                return [];
+            }
         }
 
         async function playTone(toneString) {
-            if (!audioContext) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            }
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
             await audioContext.resume();
-            
             stopTone();
             
             const notes = parseRTTTL(toneString);
-            const total = notes.reduce((s, n) => s + n.duration, 0);
+            if (notes.length === 0) {
+                document.getElementById('status').innerHTML = '<i class="bi bi-exclamation-triangle-fill icon"></i>Invalid tone format';
+                return;
+            }
             
+            const total = notes.reduce((s, n) => s + n.duration, 0);
             let time = 0;
+            
             notes.forEach((note, i) => {
                 const timeout = setTimeout(() => {
-                    playNote(note.frequency, note.duration);
+                    if (note.frequency > 0) {
+                        playNote(note.frequency, note.duration);
+                    }
                     const progress = ((time + note.duration) / total) * 100;
                     document.getElementById('bar').style.width = progress + '%';
                     
@@ -272,11 +336,8 @@
         }
 
         window.addEventListener('load', loadTonesList);
-
         document.addEventListener('click', (e) => {
-            if (!e.target.matches('button')) {
-                playRandomTone();
-            }
+            if (!e.target.matches('button')) playRandomTone();
         });
     </script>
 </body>
