@@ -2,7 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Play Tone</title>
+    <title>Tone Player</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -16,20 +17,26 @@
             text-align: center;
         }
         .player {
-            padding: 20px;
+            padding: 30px;
             border: 2px solid #4a9eff;
-            border-radius: 10px;
+            border-radius: 15px;
             background: rgba(74, 158, 255, 0.1);
+            min-width: 400px;
+        }
+        .song-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #4a9eff;
         }
         .status {
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-size: 20px;
+            margin-bottom: 15px;
         }
         .progress {
             width: 300px;
-            height: 4px;
+            height: 6px;
             background: #333;
-            border-radius: 2px;
+            border-radius: 3px;
             overflow: hidden;
             margin: 20px auto;
         }
@@ -39,26 +46,133 @@
             width: 0%;
             transition: width 0.1s;
         }
+        .icon {
+            margin-right: 8px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        .btn {
+            background: #4a9eff;
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        .btn:hover {
+            background: #3a8eef;
+        }
+        .loading {
+            color: #888;
+        }
     </style>
 </head>
 <body>
     <div class="player">
-        <div class="status" id="status">Playing Tone...</div>
+        <div class="song-title" id="songTitle">Loading tones...</div>
+        <div class="status" id="status"><i class="bi bi-hourglass-split icon"></i>Loading...</div>
         <div class="progress"><div class="bar" id="bar"></div></div>
-        <div>Tone Player</div>
+        <div class="controls">
+            <button class="btn" onclick="playRandomTone()">
+                <i class="bi bi-shuffle"></i> Random Tone
+            </button>
+            <button class="btn" onclick="stopTone()">
+                <i class="bi bi-stop-fill"></i> Stop
+            </button>
+        </div>
+        <div style="margin-top: 15px; font-size: 12px; color: #666;">
+            Tone Player - Click anywhere to play
+        </div>
     </div>
 
     <script>
-        const tone = "Toneb:d=4,o=5,b=90:8a,8b,16g6,16g6,8g6,8a6,8g6,8f#6,8f#6,16b,16b,8f#6,16f#6,16f#6,16g6,16f#6,e6,16b,16b,16b,16b,16b,16b,8e6,16b,16b,8b,16b,16g,8a,8b,16b,16b,16a,16g,8a,8b,16g,16f#,e,16b,16b,16b,16b,8b,8b,8g6,8g6,16g6,16a6,8g6,8f#6,8f#.6,16b,8f#6,16f#6,16f#6,16g6,16f#6,e6,16b,16b,16b,16b,16b,16b,8e6,8b,16b,16g,8a,8b,16b,16g,8a,8b,8a,16b,16f#,16g,16f#,2e";
-        
         let audioContext;
         let timeouts = [];
+        let tonesList = [];
+        let currentTone = '';
+        let hasPlayed = false;
 
         const freq = {
             'c': 261.63, 'c#': 279.07, 'd': 293.66, 'd#': 311.13, 'e': 329.63,
             'f': 349.23, 'f#': 369.99, 'g': 392.00, 'g#': 415.30, 'a': 440.00,
             'a#': 466.16, 'b': 493.88
         };
+
+        async function loadTonesList() {
+            try {
+                const response = await fetch('tones/tones.json');
+                tonesList = await response.json();
+                
+                if (tonesList.length > 0) {
+                    document.getElementById('status').innerHTML = '<i class="bi bi-hand-index-fill icon"></i>Click to play random tone';
+                    document.getElementById('songTitle').textContent = `${tonesList.length} tones loaded`;
+                    
+                    try {
+                        await playRandomTone();
+                    } catch (error) {
+                    }
+                } else {
+                    throw new Error('No tones found');
+                }
+            } catch (error) {
+                tonesList = [{
+                    name: "Mockingbird",
+                    file: "mockingbird.txt",
+                    content: "Mockingb:d=4,o=5,b=90:8a,8b,16g6,16g6,8g6,8a6,8g6,8f#6,8f#6,16b,16b,8f#6,16f#6,16f#6,16g6,16f#6,e6,16b,16b,16b,16b,16b,16b,8e6,16b,16b,8b,16b,16g,8a,8b,16b,16b,16a,16g,8a,8b,16g,16f#,e,16b,16b,16b,16b,8b,8b,8g6,8g6,16g6,16a6,8g6,8f#6,8f#.6,16b,8f#6,16f#6,16f#6,16g6,16f#6,e6,16b,16b,16b,16b,16b,16b,8e6,8b,16b,16g,8a,8b,16b,16g,8a,8b,8a,16b,16f#,16g,16f#,2e"
+                }];
+                
+                document.getElementById('status').innerHTML = '<i class="bi bi-hand-index-fill icon"></i>Click to play';
+                document.getElementById('songTitle').textContent = 'Fallback tone loaded';
+                
+                try {
+                    await playRandomTone();
+                } catch (error) {
+
+                }
+            }
+        }
+
+        async function loadToneFile(filename) {
+            try {
+                const response = await fetch(`tones/${filename}`);
+                return await response.text();
+            } catch (error) {
+                console.error('Error loading tone file:', error);
+                return null;
+            }
+        }
+
+        async function playRandomTone() {
+            if (tonesList.length === 0) return;
+
+            const randomTone = tonesList[Math.floor(Math.random() * tonesList.length)];
+            
+            let toneContent;
+            if (randomTone.content) {
+                toneContent = randomTone.content;
+            } else {
+                toneContent = await loadToneFile(randomTone.file);
+                if (!toneContent) return;
+            }
+
+            currentTone = toneContent.trim();
+            
+            document.getElementById('songTitle').textContent = randomTone.name;
+            document.getElementById('status').innerHTML = '<i class="bi bi-play-fill icon"></i>Playing...';
+            
+            await playTone(currentTone);
+            hasPlayed = true;
+        }
+
+        function stopTone() {
+            timeouts.forEach(clearTimeout);
+            timeouts = [];
+            document.getElementById('bar').style.width = '0%';
+            document.getElementById('status').innerHTML = '<i class="bi bi-stop-fill icon"></i>Stopped';
+        }
 
         function getFreq(note, octave) {
             const base = freq[note.toLowerCase()];
@@ -126,11 +240,15 @@
             return result;
         }
 
-        async function playTone() {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        async function playTone(toneString) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
             await audioContext.resume();
             
-            const notes = parseRTTTL(tone);
+            stopTone();
+            
+            const notes = parseRTTTL(toneString);
             const total = notes.reduce((s, n) => s + n.duration, 0);
             
             let time = 0;
@@ -142,7 +260,8 @@
                     
                     if (i === notes.length - 1) {
                         setTimeout(() => {
-                            document.getElementById('status').textContent = 'Complete';
+                            document.getElementById('status').innerHTML = '<i class="bi bi-check-circle-fill icon"></i>Complete';
+                            setTimeout(playRandomTone, 2000);
                         }, note.duration * 1000);
                     }
                 }, time * 1000);
@@ -152,18 +271,13 @@
             });
         }
 
-        window.addEventListener('load', () => {
-            setTimeout(playTone, 500);
-        });
+        window.addEventListener('load', loadTonesList);
 
-        document.addEventListener('click', () => {
-            timeouts.forEach(clearTimeout);
-            timeouts = [];
-            document.getElementById('bar').style.width = '0%';
-            document.getElementById('status').textContent = 'Playing Tone...';
-            setTimeout(playTone, 100);
+        document.addEventListener('click', (e) => {
+            if (!e.target.matches('button')) {
+                playRandomTone();
+            }
         });
     </script>
 </body>
 </html>
-</script>
