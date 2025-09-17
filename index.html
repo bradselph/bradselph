@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="UTF-8">
     <title>Random Tone Player</title>
@@ -16,6 +17,7 @@
             height: 100vh;
             text-align: center;
         }
+
         .player {
             padding: 30px;
             border: 2px solid #4a9eff;
@@ -23,6 +25,7 @@
             background: rgba(74, 158, 255, 0.1);
             min-width: 420px;
         }
+
         .song-title {
             font-size: 22px;
             font-weight: bold;
@@ -35,19 +38,23 @@
             opacity: 0;
             transition: opacity 0.5s;
         }
+
         .song-title.show {
             opacity: 1;
         }
+
         .song-file {
             font-size: 13px;
             color: #bbb;
             margin-bottom: 15px;
         }
+
         .status {
             font-size: 18px;
             margin-bottom: 15px;
             color: #eee;
         }
+
         .progress {
             width: 320px;
             height: 6px;
@@ -56,18 +63,22 @@
             overflow: hidden;
             margin: 20px auto;
         }
+
         .bar {
             height: 100%;
             background: #4a9eff;
             width: 0%;
             transition: width 0.15s;
         }
+
         .icon {
             margin-right: 6px;
         }
+
         .controls {
             margin-top: 20px;
         }
+
         .btn {
             background: #4a9eff;
             border: none;
@@ -78,20 +89,25 @@
             cursor: pointer;
             font-family: monospace;
         }
+
         .btn:hover {
             background: #3a8eef;
         }
+
         .loading {
             color: #888;
         }
     </style>
 </head>
+
 <body>
     <div class="player">
         <div class="song-title" id="songTitle"><i class="bi bi-music-note-beamed"></i>Loading tones...</div>
         <div class="song-file" id="songFile">Please wait</div>
         <div class="status" id="status"><i class="bi bi-hourglass-split icon"></i>Loading...</div>
-        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div class="progress">
+            <div class="bar" id="bar"></div>
+        </div>
         <div class="controls">
             <button class="btn" onclick="playRandomTone()">
                 <i class="bi bi-shuffle"></i>Random Tone
@@ -122,31 +138,180 @@
             'b': 493.88
         };
 
+        const fallbackTones = [
+            {
+                "name": "Jay - Z Feat. Linkin Park - Numb Encore",
+                "file": "Jay - Z Feat. Linkin Park - Numb Encore.txt",
+                "content": "ZFeat.Li:d=4,o=5,b=100:a#,8p,8a#,a#,g#,a#,8a#,8a#,a#,c6,g#,8a#,8a#,a#,g#,a#,8a#,8a#,a#,g#,a#,8p,8a#,a#,g#,a#,8a#,8a#,a#,c6,g#,8a#,8a#,a#,g#,a#,8a#,8a#,a#,g#,a#,8p,8a#,a#,g#,a#,8a#,8a#,a#,c6,g#,8a#,8a#,a#,g#,a#,8a#,8a#,a#,g#,a#"
+            },
+            {
+                "name": "Jay Z feat. Linkin Park - Numb Encore",
+                "file": "Jay Z feat. Linkin Park - Numb Encore.txt",
+                "content": "NumbEnco:d=4,o=6,b=100:a_5,8p,8a_5,a_5,g_5,a_5,8a_5,8a_5,a_5,c,g_5,8a_5,8a_5,a_5,g_5,a_5,8a_5,8a_5,a_5,g_5,a_5,8p,8a_5,a_5,g_5,a_5,8a_5,8a_5,a_5,c,g_5,8a_5,8a_5,a_5,g_5,a_5,8a_5,8a_5,a_5,g_5,a_5,8p,8a_5,a_5,g_5,a_5,8a_5,8a_5,a_5,c,g_5,8a_5,8a_5,a_5,g_5,a_5,8a_5,8a_5,a_5,g_5,a_5"
+            },
+            {
+                "name": "Linkin Park - 1 Step Closer",
+                "file": "Linkin Park - 1 Step Closer.txt",
+                "content": "1StepClo:d=4,o=6,b=112:32p,16a5,16a5,8a5,8a5,8g,8f_5,8g5,f_5,8a5,16a5,16a5,8a5,8g5,8f_5,8d,c,32p,16a5,16a5,8a5,8a5,8g,8f_5,8g5,f_5,8a5,16a5,16a5,8a5,8g5,8f_5,8d,c"
+            },
+            {
+                "name": "Linkin Park - One Step Closer",
+                "file": "Linkin Park - One Step Closer.txt",
+                "content": "OneStepC:d=8,o=5,b=63:32p,16a,16a,a,a,g,f#,g,4f#.,a,16a,16a,a,g,f#,d6,4c.6"
+            },
+            {
+                "name": "Linkin Park - One Step Closer 1",
+                "file": "Linkin Park - One Step Closer 1.txt",
+                "content": "OneStepC:d=4,o=5,b=100:8c#,8c#6,16g#,8d#.6,8a,8g#,16c#,8e.,8c#,8c#6,16g#,8d#.6,8a,8g#,16c#,8e.,8c#,8c#6,16g#,8d#.6,8a,8g#,16c#,8e.,8c#,8c#6,16g#,8d#.6,8a,8g#,16c#,8e."
+            },
+            {
+                "name": "Linkin Park - One Step Closer 2",
+                "file": "Linkin Park - One Step Closer 2.txt",
+                "content": "OneStepC:d=4,o=5,b=100:16g#,16g#,8g#,8g#,8g#,8f#,8f#,16b,16b,8c#6,8c#6,16c#6,16c#6,16c#6,16c#6,8c#6,8p,16c#6,16c#6,16c#6,16c#6,8c#6,8p,16g#,16g#,8g#,8g#,8g#,8f#,8f#,16b,16b,8c#6,8c#6,16c#6,16c#6,16c#6,16c#6,8c#6,8p,16c#6,16c#6,16c#6,16c#6,8c#6"
+            },
+            {
+                "name": "Linkin Park - Breaking The Habit",
+                "file": "Linkin Park - Breaking The Habit.txt",
+                "content": "Breaking:d=4,o=6,b=180:e5,8c,8c,8p,8b5,8p,8a5,8p,g5,8a5,8p,8a5,p,8p,8e5,8c,8c,8p,8b5,8p,8a5,8p,b.5,2p,8p,8e5,8c,8c,8p,8b5,8p,8a5,8p,g5,8a5,8p,8a5,p,8p,8e5,8c,8c,8p,8b5,8p,8a5,8p,8b5,2p,p,8p,8e5,8c,8c,8p,8b5,8p,8a5,8p,g.5,a5,a5,8p,8e5,8c,8c,8p,8b5,8p,8a5,8p,8b5,2p,e5,e5,1c,2b5,2a5,2c.,b5,2b.5,e5,1c,2b5,2a5,2c.,b5,2b.5,8a5,a.5"
+            },
+            {
+                "name": "Linkin Park - By Myself",
+                "file": "Linkin Park - By Myself.txt",
+                "content": "ByMyself:d=4,o=6,b=220:c.5,8c,8d_5,d_.5,8c5,f5,c5,g_5,2d5,d5,c.5,8c,8d_5,d_.5,8c5,f5,c5,g_5,2d5,d5,c.5,8c,8d_5,d_.5,8c5,f5,c5,g_5,2d5,d5,d_.5,8c5,f5,c5,f5,c5,g_5,2d5,d5,c.5,8c,8d_5,d_.5,8c5,f5,c5,g_5,2d5,d5"
+            },
+            {
+                "name": "Linkin Park - Crawling (Intro)",
+                "file": "Linkin Park - Crawling (Intro).txt",
+                "content": "Crawling:d=4,o=6,b=112:8e5,c.,b.5,p,a5,8g5,f#5,g5,8e5,c.,b.5,p,a5,8g5,f#5,g5,8e5,c.,b.5,p,a5,8g5,f#5,g5"
+            },
+            {
+                "name": "Linkin Park - Crawling",
+                "file": "Linkin Park - Crawling.txt",
+                "content": "Crawling:d=16,o=5,b=125:2b,2g#,4f#,8e,4d#,4e,8c#,2b,2g#,4f#,8e,4d#,4e,8c#,4g#.,8a,4g#.,8a,1g#,4g#.,8a,4g#.,8a,8g#,2f#."
+            },
+            {
+                "name": "Linkin Park - Crawlin",
+                "file": "Linkin Park - Crawlin.txt",
+                "content": "Crawlin:d=4,o=6,b=40:16a.5,32a_5,16a.5,32a_5,8a.5,32p,32a_5,16a.5,32a_5,16a.5,32a_5,32a5,8g.5,32p,16a.5,32a_5,16a.5,32a_5,8a.5,32p,32a_5,16a.5,32a_5,16a.5,32a_5,32a5,g5"
+            },
+            {
+                "name": "Linkin Park - Crawling 1",
+                "file": "Linkin Park - Crawling 1.txt",
+                "content": "Crawling:d=32,o=5,b=25:p,16a.,a#,16a.,a#,8a.,a,16a.,a#,16a.,a#,a,8g.,16a.,a#,16a.,a#,8a.,a,16a.,a#,16a.,a#,a,4g"
+            },
+            {
+                "name": "Linkin Park - Crawling 2",
+                "file": "Linkin Park - Crawling 2.txt",
+                "content": "Crawling:d=4,o=5,b=40:32p,16d,8c.6,a,16g.,32f.,16e.,16f.,16d,8c.6,a,16g.,32f.,16e.,16f."
+            },
+            {
+                "name": "Linkin Park - Faint",
+                "file": "Linkin Park - Faint.txt",
+                "content": "Faint:d=4,o=5,b=140:g6,16c,16p,g6,16c,16p,g6,16d#,16p,8g6,8g6,8f6,8g6,8g6,g6,16g#,16p,8g6,8g6,8f6,8g6,8g6,g6,8g6,8g6,16f,16p,8g6,16g,16p,8f6,g6,g6,16c,16p,g6,16c,16p,g6,16d#,16p,8g6,8g6,8f6,8g6,8g6,g6,16g#,16p,8g6,8g6,8f6,8g6,8g6,g6,8g6,8g6,16f,16p,8g6,16g,16p,8f6,g6,8c"
+            },
+            {
+                "name": "Linkin Park - In The End (Introduction)",
+                "file": "Linkin Park - In The End (Introduction).txt",
+                "content": "InTheEnd:d=4,o=6,b=200:d.5,32p,a.5,32p,a.5,32p,f.5,32p,e.5,32p,e.5,32p,e.5,32p,e.5,32p,8e.5,8f.5,d.5,32p,a.5,32p,a.5,32p,f.5,32p,e.5,32p,e.5,32p,e.5,32p,8e.5,8f.5,d.5,32p,a.5,32p,a.5,32p,f.5,32p,e.5,32p,e.5,32p,e.5,32p,8e.5,8f.5,d.5"
+            },
+            {
+                "name": "Linkin Park - In The End",
+                "file": "Linkin Park - In The End.txt",
+                "content": "InTheEnd:d=16,o=5,b=180:4d.,8p,4a.,8p,4a.,8p,4f.,8p,4e.,8p,4e.,8p,4e.,8p,4e,4f,4d.,8p,4a.,8p,4a.,8p,4f.,8p,4e.,8p,4e.,8p,4e.,8p,4e,4f,4d.,8p,4a.,8p,4a.,8p,4f.,8p,4e.,8p,4e.,8p,4e.,8p,4e,4f,4d."
+            },
+            {
+                "name": "Linkin Park - In The End 1",
+                "file": "Linkin Park - In The End 1.txt",
+                "content": "InTheEnd:d=4,o=6,b=180:d.5,8p,a.5,8p,a.5,8p,f.5,8p,e.5,8p,e.5,8p,e.5,8p,e5,f5,d.5,8p,a.5,8p,a.5,8p,f.5,8p,e.5,8p,e.5,8p,e.5,8p,e5,f5,d.5,8p,a.5,8p,a.5,8p,f.5,8p,e.5,8p,e.5,8p,e.5,8p,e5,f5,d.5"
+            },
+            {
+                "name": "Linkin Park - In The End 2",
+                "file": "Linkin Park - In The End 2.txt",
+                "content": "InTheEnd:d=8,o=5,b=80:e.,b.,b.,g.,f#.,f#.,f#.,16.f#.,16.g.,e.,b.,b.,g.,f#.,f#.,f#.,16.f#.,16.g.,e.,b.,b.,g.,f#.,f#.,f#.,16.f#.,16.g.,e.,b.,b.,g.,f#.,f#.,f#.,16.f#.,16.g."
+            },
+            {
+                "name": "Linkin Park - In The End 3",
+                "file": "Linkin Park - In The End 3.txt",
+                "content": "InTheEnd:d=8,o=6,b=112:4c#,4d#,4f.,f,f.,c#.,2c#,4p,16c#,c#,d#,4f.,f,16f,16d#,f,f#,f,4d#,p,a#5,4c#,4d#,4f.,f,f.,c#.,2c#,4p,16c#,c#,d#,4f.,f,16f,16d#,f,d#,4f#,f,d#,4c#."
+            },
+            {
+                "name": "Linkin Park - My December",
+                "file": "Linkin Park - My December.txt",
+                "content": "MyDecemb:d=16,o=5,b=112:8c6,8c6,4c6,4a,1g,8p,8c6,8c6,4c6,4a,4g,4d6,4c6,2g,8p,8c6,8c6,4c6,4a,1g,8p,8c6,8c6,4c6,4a,4g,4d6,4c6,4g"
+            },
+            {
+                "name": "Linkin Park - Numb",
+                "file": "Linkin Park - Numb.txt",
+                "content": "Numb:d=4,o=6,b=112:f_.,8f_,f_,e,f_,8f_,8f_,f_,g_,e.,8f_,f_,e,f_,8f_,8f_,f_,e,f_.,8f_,f_,e,f_,8f_,8f_,f_,g_,e.,8f_,f_,e,f_,8f_,8f_,f_,e,p,8f_,8f_,8f_,8f_,8e,f_,8e"
+            },
+            {
+                "name": "Linkin Park - Numb V2",
+                "file": "Linkin Park - Numb V2.txt",
+                "content": "NumbV2:d=4,o=6,b=112:8c,8e,8c_,f_.,a.,g_.,p,8c_,8e,8c_,a.,g_.,2e,8p,8c_,8e,8c_,f_.,a.,g_.,p,8c_,8e,8c_,a.,g_.,2e"
+            },
+            {
+                "name": "Linkin Park - Paper Cut",
+                "file": "Linkin Park - Paper Cut.txt",
+                "content": "PaperCut:d=16,o=5,b=140:8c#7,8g#6,8d#7,8g#6,8e7,8g#6,8d#7,8g#6,8c#7,8g#6,8d#7,8g#6,8e7,8g#6,8d#7,8g#6,8c#,8c#,8c#,4e6,4d#6,1b,8c#,8c#,8c#,4e6,4d#6,1b"
+            },
+            {
+                "name": "Linkin Park - Papercut",
+                "file": "Linkin Park - Papercut.txt",
+                "content": "Papercut:d=4,o=5,b=140:8c#7,8g#6,8d#7,8g#6,8e7,8g#6,8d#7,8g#6,8c#7,8g#6,8d#7,8g#6,8e7,8g#6,8d#7,8g#6,8c#,8c#,8c#,e6,d#6,1b,8c#,8c#,8c#,e6,d#6,1b"
+            },
+            {
+                "name": "Linkin Park - Points Of Authority",
+                "file": "Linkin Park - Points Of Authority.txt",
+                "content": "PointsOf:d=16,o=5,b=200:4e7,4e7,8d7,4d7,4c7,4c7,4c6,1e7,4e7,4e7,8d7,4d7,4c7,4c7,4c6,1e7,4e7,4e7,8d7,4d7,4c7,4c7,4c6,1e7,4e7,4e7,8d7,4d7,4c7,4c7,4c6,2e7,2e6,4c7,8c7,4c7,4c7,4c7"
+            },
+            {
+                "name": "Linkin Park - Somewhere I Belong",
+                "file": "Linkin Park - Somewhere I Belong.txt",
+                "content": "Somewher:d=4,o=5,b=160:8g6,8g6,8f6,g6,8c,8p,8c,8g6,8g6,8f6,g6,8d#,8p,8d#,8p,8g6,8f6,g6,8f6,8g6,8g#,8g#6,8g#,g.6,8f,8p,8f,8g6,8g6,8f6,g6,8g6,8f6,8c,8d#6,8c,8f6,8d#,8d#6,8d#,8f6,8d#,8g6,8d#,2g6,8p,8g#,8p,8g#,8p,8f,8p,8f,8p,8f,8c"
+            },
+            {
+                "name": "Linkin Park - Somewhere I Belong V2",
+                "file": "Linkin Park - Somewhere I Belong V2.txt",
+                "content": "Somewher:d=4,o=5,b=160:8c7,8c7,8a#6,c7,8f,8p,8f,8c7,8c7,8a#6,c7,8g#,8p,8g#,8p,8c7,8a#6,c7,8a#6,8c7,8c#6,8c#7,8c#6,c.7,8a#,8p,8a#,8c7,8c7,8a#6,c7,8c7,8a#6,8f,8g#6,8f,8a#6,8g#,8g#6,8g#,8a#6,8g#,8c7,8g#,2c7,8p,8c#6,8p,8c#6,8p,8a#,8p,8a#,8p,8a#,8f"
+            },
+            {
+                "name": "Linkin Park - With You",
+                "file": "Linkin Park - With You.txt",
+                "content": "WithYou:d=4,o=6,b=160:f5,c5,g_5,2d5,d5,c.5,8c,8d_5,d_.5,8c5,f5,c5,g_5,2d5,d5,f5,8d_5,d_.5,8c5,f5,c5,g_5,2d5,d5,2d5,d5,c.5,8c,8d_5,d_.5,8c5,f5,8d_5,d_.5,8c5,f5,8d_5,d_.5,8c5,d_.5,8c5,f5,c5,g_5,2d5,d5,f5,8d_5,d_.5,8c5,f5,c5,g_5,2d5,d5,2d5,d5,c.5,8c,c5,g_5,2d5,d5,2d5,d5,c.5,8c,8d_5,d_.5"
+            },
+            {
+                "name": "Linkin park - A Place For My Head",
+                "file": "Linkin park - A Place For My Head.txt",
+                "content": "APlaceFo:d=16,o=5,b=125:4a,8a,e6,e6,8e6,8f6,8e6,8d6,4c6,8c6,a,a,8a#,8a#,8a#,8c6,4a,8a,e6,e6,8e6,8f6,8e6,8d6,4c6,8c6,a,a,8a#,8a#,8a#,8c6"
+            },
+            {
+                "name": "Linkin Park - Place 4 My Head",
+                "file": "Linkin Park - Place 4 My Head.txt",
+                "content": "Place4My:d=4,o=6,b=140:a5,8a5,16e,16e,8e,8f,8e,8d,8p,c,16a5,16a5,8a_5,8a_5,8c,a5,8a5,16e,16e,8e,8f,8e,8d,8p,c,16a5,16a5,8a_5,8a_5,8a_5,8c,a5"
+            }
+        ];
+
         async function loadTonesList() {
             try {
                 const response = await fetch('tones/tones.json');
                 tonesList = await response.json();
-                
+
                 if (tonesList.length > 0) {
                     document.getElementById('status').innerHTML = '<i class="bi bi-hand-index-fill icon"></i>Click to play random tone';
                     document.getElementById('songTitle').textContent = `${tonesList.length} tones loaded`;
                     document.getElementById('songFile').textContent = 'Ready';
                     document.getElementById('songTitle').classList.add('show');
-                    try { await playRandomTone(); } catch {}
+                    try { await playRandomTone(); } catch { }
                 } else {
                     throw new Error('No tones found');
                 }
             } catch {
-                tonesList = [{
-                    name: "Mockingbird",
-                    file: "mockingbird.txt",
-                    content: "Mockingb:d=4,o=5,b=90:8a,8b,16g6,16g6,8g6,8a6,8g6,8f#6,8f#6,16b,16b,8f#6,16f#6,16f#6,16g6,16f#6,e6,16b,16b,16b,16b,16b,16b,8e6,16b,16b,8b,16b,16g,8a,8b,16b,16b,16a,16g,8a,8b,16g,16f#,e,16b,16b,16b,16b,8b,8b,8g6,8g6,16g6,16a6,8g6,8f#6,8f#.6,16b,8f#6,16f#6,16f#6,16g6,16f#6,e6,16b,16b,16b,16b,16b,16b,8e6,8b,16b,16g,8a,8b,16b,16g,8a,8b,8a,16b,16f#,16g,16f#,2e"
-                }];
+                tonesList = fallbackTones;
                 document.getElementById('status').innerHTML = '<i class="bi bi-hand-index-fill icon"></i>Click to play';
-                document.getElementById('songTitle').textContent = 'Fallback Tone';
-                document.getElementById('songFile').textContent = 'mockingbird';
+                document.getElementById('songTitle').textContent = `${tonesList.length} fallback tones loaded`;
+                document.getElementById('songFile').textContent = 'Default set';
                 document.getElementById('songTitle').classList.add('show');
-                try { await playRandomTone(); } catch {}
+                try { await playRandomTone(); } catch { }
             }
         }
 
@@ -162,7 +327,7 @@
         async function playRandomTone() {
             if (tonesList.length === 0) return;
             const randomTone = tonesList[Math.floor(Math.random() * tonesList.length)];
-            
+
             let toneContent = randomTone.content ? randomTone.content : await loadToneFile(randomTone.file);
             if (!toneContent) return;
             currentTone = toneContent.trim();
@@ -191,35 +356,35 @@
 
         function getFreq(note, octave) {
             if (!note) return 0;
-            
+
             note = note.toLowerCase();
-            
+
             const base = freq[note];
             if (!base) return 0;
-            
+
             octave = Math.max(0, Math.min(10, octave));
-            
+
             return base * Math.pow(2, octave - 5);
         }
 
         function playNote(frequency, duration) {
             if (!frequency || !audioContext) return;
-            
+
             try {
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
                 osc.connect(gain);
                 gain.connect(audioContext.destination);
-                
+
                 osc.frequency.value = Math.max(20, Math.min(20000, frequency));
                 osc.type = 'square';
-                
+
                 const now = audioContext.currentTime;
                 gain.gain.setValueAtTime(0, now);
-                gain.gain.linearRampToValueAtTime(0.1, now + 0.01);
-                gain.gain.linearRampToValueAtTime(0.1, now + duration - 0.01);
+                gain.gain.linearRampToValueAtTime(1, now + 0.0003);
+                gain.gain.linearRampToValueAtTime(1, now + duration - 0.003);
                 gain.gain.linearRampToValueAtTime(0, now + duration);
-                
+
                 osc.start(now);
                 osc.stop(now + duration);
             } catch (error) {
@@ -233,10 +398,10 @@
                 if (parts.length < 3) {
                     throw new Error('Invalid RTTTL format');
                 }
-                
+
                 const [name, defaults, notes] = parts;
                 let bpm = 120, defDur = 4, defOct = 5;
-                
+
                 defaults.split(',').forEach(p => {
                     const trimmed = p.trim();
                     if (trimmed.includes('=')) {
@@ -253,46 +418,46 @@
 
                 const result = [];
                 const noteTokens = notes.split(',');
-                
+
                 noteTokens.forEach(token => {
                     token = token.trim();
                     if (!token) return;
-                    
+
                     let dur = defDur, oct = defOct, note = '';
                     let remainingToken = token;
-                    
+
                     const durMatch = remainingToken.match(/^(\d+)/);
                     if (durMatch) {
                         dur = parseInt(durMatch[1]);
                         remainingToken = remainingToken.slice(durMatch[1].length);
                     }
-                    
+
                     const noteMatch = remainingToken.match(/^([a-gpr]#?b?)/i);
                     if (noteMatch) {
                         note = noteMatch[1].toLowerCase();
                         remainingToken = remainingToken.slice(noteMatch[1].length);
-                        
+
                         if (note === 'r') note = 'p';
                     }
-                    
+
                     const octMatch = remainingToken.match(/^(\d+)/);
                     if (octMatch) {
                         oct = parseInt(octMatch[1]);
                         remainingToken = remainingToken.slice(octMatch[1].length);
                     }
-                    
+
                     const dots = (remainingToken.match(/\./g) || []).length;
-                    
+
                     let duration = (60 / bpm) * (4 / dur);
                     for (let i = 0; i < dots; i++) {
                         duration *= 1.5;
                     }
-                    
+
                     const frequency = (note === 'p' || note === 'r') ? 0 : getFreq(note, oct);
-                    
+
                     result.push({ frequency, duration, note, octave: oct });
                 });
-                
+
                 return result;
             } catch (error) {
                 console.error('Error parsing RTTTL:', error);
@@ -304,24 +469,25 @@
             if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
             await audioContext.resume();
             stopTone();
-            
+
             const notes = parseRTTTL(toneString);
             if (notes.length === 0) {
                 document.getElementById('status').innerHTML = '<i class="bi bi-exclamation-triangle-fill icon"></i>Invalid tone format';
                 return;
             }
-            
-            const total = notes.reduce((s, n) => s + n.duration, 0);
+
+            const noteSeparation = 0.015;
+            const total = notes.reduce((s, n) => s + n.duration + noteSeparation, 0);
             let time = 0;
-            
+
             notes.forEach((note, i) => {
                 const timeout = setTimeout(() => {
                     if (note.frequency > 0) {
                         playNote(note.frequency, note.duration);
                     }
-                    const progress = ((time + note.duration) / total) * 100;
+                    const progress = ((time + note.duration + noteSeparation) / total) * 100;
                     document.getElementById('bar').style.width = progress + '%';
-                    
+
                     if (i === notes.length - 1) {
                         setTimeout(() => {
                             document.getElementById('status').innerHTML = '<i class="bi bi-check-circle-fill icon"></i>Complete';
@@ -329,9 +495,9 @@
                         }, note.duration * 1000);
                     }
                 }, time * 1000);
-                
+
                 timeouts.push(timeout);
-                time += note.duration;
+                time += note.duration + noteSeparation;
             });
         }
 
@@ -341,4 +507,5 @@
         });
     </script>
 </body>
+
 </html>
