@@ -1,11 +1,60 @@
 <!DOCTYPE html>
 <html>
+<!-- TODO: Missing lang attribute. The presence of international tone files (Zie Ginds Komt De Stoomboot.txt,
+     Zeljko Sasic - Gori More.txt) implies multi-language support should be considered, but no lang="en"
+     attribute is set for accessibility and SEO. -->
+
+<!-- TODO: Missing meta viewport tag. The responsive CSS with min-width: 420px and flex centering implies
+     mobile support, but no <meta name="viewport" content="width=device-width, initial-scale=1.0"> tag
+     exists, which would break mobile rendering. -->
+
+<!-- TODO: Missing PWA manifest. The application is served via GitHub Pages, loads 11,061 tones from external
+     files, has fallback tones for offline scenarios, and is a perfect candidate for offline-first PWA, but
+     no manifest.json, service worker, or app icons are registered. The fallbackTones array (lines 141-292)
+     specifically handles offline scenarios, implying this was considered but never fully implemented. -->
+
+<!-- TODO: Missing Open Graph and social meta tags. The application has a title, loads rich content (11K+ tones),
+     and is deployed to a public URL (bradselph.github.io), but has no og:title, og:description, og:image tags
+     for social sharing. This is implied by the public deployment and shareable nature of the content. -->
 
 <head>
     <meta charset="UTF-8">
     <title>Random Tone Player</title>
+    <!-- TODO: Missing dynamic title updates. The songTitle element (line 105) updates with current tone name,
+         but document.title never changes to reflect currently playing tone, which is a common pattern for
+         media players and would improve UX when user has multiple tabs open. See playRandomTone() line 339
+         where title is updated in DOM but not in document.title. -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- TODO: Missing favicon. Bootstrap icons are loaded for UI but no favicon is defined. The presence of
+         extensive branding (custom colors #4a9eff, border styling, loading states) implies visual identity
+         was considered, but no <link rel="icon"> exists. -->
+
+    <!-- TODO: Missing preload hints for critical resources. The tones/tones.json file (838KB, 11,061 entries)
+         is loaded on every page load (line 296) but no <link rel="preload" as="fetch"> hint exists to improve
+         initial load performance. -->
+
     <style>
+        /* TODO: Missing CSS custom properties (CSS variables) for theming. The consistent color scheme
+           (#4a9eff, #1a1a1a, #333, etc.) is used throughout, but no --primary-color, --bg-color variables
+           exist. This makes theme customization difficult and suggests a theme system was intended but not
+           implemented. */
+
+        /* TODO: Missing dark/light mode toggle. The application uses a fixed dark theme (#1a1a1a background),
+           but modern web apps typically support user preference via prefers-color-scheme media query or
+           manual toggle. The presence of carefully chosen dark theme colors implies consideration for
+           visual design, but no light mode alternative exists. */
+
+        /* TODO: Missing @media print styles. The application displays song information and has rich content,
+           but no print stylesheet exists to handle printing tone lists or currently playing information. */
+
+        /* TODO: Missing responsive breakpoints. The min-width: 420px on .player implies mobile consideration,
+           but no @media queries for tablet/mobile adjustments exist. The UI may break on screens < 420px. */
+
+        /* TODO: Missing prefers-reduced-motion support. The CSS includes fade-in animations (opacity transition
+           line 69, bar width transition line 101) but no @media (prefers-reduced-motion: reduce) query exists
+           to respect user accessibility preferences, which is a WCAG requirement. */
+
         body {
             margin: 0;
             background: #1a1a1a;
@@ -17,6 +66,9 @@
             height: 100vh;
             text-align: center;
         }
+        /* TODO: Missing scrolling support for overflow content. The body uses height: 100vh with centered
+           flex layout, which prevents scrolling if content exceeds viewport. With 11,061 tones, a future
+           list view feature would require scroll handling, but no overflow properties are set. */
 
         .player {
             padding: 30px;
@@ -24,6 +76,9 @@
             border-radius: 15px;
             background: rgba(74, 158, 255, 0.1);
             min-width: 420px;
+            /* TODO: Missing max-width constraint. The min-width: 420px ensures minimum size, but no max-width
+               exists, which could cause the player to stretch excessively on large screens. The presence of
+               min-width implies responsive design consideration, but the implementation is incomplete. */
         }
 
         .song-title {
@@ -37,6 +92,13 @@
             gap: 8px;
             opacity: 0;
             transition: opacity 0.5s;
+            /* TODO: Missing text overflow handling. Tone names can be long (e.g., "Jay Z feat. Linkin Park -
+               Numb Encore" from fallbackTones line 148), but no text-overflow: ellipsis, overflow: hidden, or
+               white-space: nowrap properties exist. Long names will wrap or overflow unpredictably. */
+            /* TODO: Missing click/tap interaction styles. The song-title displays the current tone name, and
+               similar music players allow clicking the title to copy, share, or view details, but no cursor:
+               pointer or hover state exists. The structured metadata (name, file) implies this data should
+               be interactive. */
         }
 
         .song-title.show {
@@ -47,12 +109,22 @@
             font-size: 13px;
             color: #bbb;
             margin-bottom: 15px;
+            /* TODO: Missing link to file. The song-file element displays filename (e.g., "'N Sync - Bye Bye
+               Bye.txt" from tones.json line 4), but it's not clickable or copyable. Users cannot download or
+               view the raw RTTTL file. The display of filename implies it should be actionable. */
+            /* TODO: Missing artist/song parsing. Filenames follow "Artist - Song.txt" convention (e.g.,
+               "'N Sync - Bye Bye Bye.txt", "2 Pac - California Love.txt"), but the filename is displayed
+               raw without parsing into structured artist/title fields. The consistent naming pattern implies
+               metadata extraction was intended but not implemented. */
         }
 
         .status {
             font-size: 18px;
             margin-bottom: 15px;
             color: #eee;
+            /* TODO: Missing aria-live region support. The status element changes frequently (Loading, Playing,
+               Stopped, Complete - see lines 330, 375, 384, 523 in JS) but no role="status" or aria-live="polite"
+               attribute is defined in HTML, making status updates invisible to screen readers. */
         }
 
         .progress {
@@ -62,6 +134,16 @@
             border-radius: 3px;
             overflow: hidden;
             margin: 20px auto;
+            /* TODO: Missing click-to-seek functionality. The progress bar is purely visual (updated in playTone
+               line 519), but most media players allow clicking the progress bar to seek to a specific position
+               in the track. No cursor: pointer or click handler exists. The presence of time tracking (time
+               variable in playTone line 511) implies seek capability was considered. */
+            /* TODO: Missing time display. The progress bar shows visual progress but no current/total time
+               text (e.g., "0:15 / 1:23") is displayed. The duration calculation exists (line 510: total time
+               computed) but is never rendered as text, only as bar width percentage. */
+            /* TODO: Missing progress bar label for accessibility. The progress bar has no aria-label,
+               aria-valuenow, aria-valuemin, aria-valuemax attributes, making it impossible for screen readers
+               to announce playback progress. This is implied by WCAG requirements for interactive elements. */
         }
 
         .bar {
@@ -77,6 +159,16 @@
 
         .controls {
             margin-top: 20px;
+            /* TODO: Missing additional playback controls. The controls section only has Random and Stop buttons,
+               but typical media players include: Previous, Next, Pause/Resume, Repeat, Shuffle toggle. The
+               presence of auto-play next (line 524) and random selection (line 359) implies these controls
+               were considered but never added. */
+            /* TODO: Missing volume control. No volume slider or mute button exists. The Web Audio API gain
+               node is used (line 405) with fixed values (0 to 1), implying volume control infrastructure
+               exists but UI was never implemented. */
+            /* TODO: Missing playback speed control. RTTTL format includes BPM (beats per minute) in defaults
+               (line 433), and playTone respects this, but no UI exists to adjust playback speed multiplier
+               (e.g., 0.5x, 1x, 1.5x, 2x common in media players). */
         }
 
         .btn {
@@ -88,6 +180,15 @@
             border-radius: 5px;
             cursor: pointer;
             font-family: monospace;
+            /* TODO: Missing focus styles. Buttons have hover state but no :focus or :focus-visible styles for
+               keyboard navigation accessibility. The cursor: pointer implies interactive design, but keyboard
+               users get no visual feedback. */
+            /* TODO: Missing disabled state styling. Buttons should be disabled during loading or when no tones
+               are available, but no .btn:disabled or .btn[disabled] styles exist. The loading states (line 330)
+               imply button state management was considered. */
+            /* TODO: Missing button icons with text alternatives. Buttons use Bootstrap icons (bi-shuffle,
+               bi-stop-fill) but no sr-only text exists for screen readers who can't see icons. WCAG requires
+               text alternatives for non-text content. */
         }
 
         .btn:hover {
@@ -96,37 +197,175 @@
 
         .loading {
             color: #888;
+            /* TODO: Loading class is defined but never used in the codebase. This suggests loading state UI
+               (spinner, skeleton screens) was planned but never implemented. Status messages exist (line 330)
+               but no visual loading indicators beyond text. */
         }
     </style>
 </head>
 
 <body>
+    <!-- TODO: Missing skip-to-content link. Keyboard users should be able to skip navigation/header, but no
+         <a href="#main" class="sr-only">Skip to content</a> link exists. This is a WCAG 2.1 Level A requirement. -->
+
+    <!-- TODO: Missing main landmark. The body contains a single .player div but no <main> element to identify
+         primary content for screen readers and SEO. Semantic HTML5 elements improve accessibility. -->
+
+    <!-- TODO: Missing search/filter interface. With 11,061 tones loaded (see loadTonesList line 331), users
+         have no way to search by artist, song, or filter by genre/category. The large dataset implies search
+         was essential but never implemented. The structured filenames (Artist - Song.txt) provide searchable
+         metadata that is not exposed in the UI. -->
+
+    <!-- TODO: Missing tone list/browser view. Only random playback is supported, but users cannot browse,
+         scroll through, or select specific tones from the 11,061-tone library. The tonesList array (line 157)
+         holds all tones but is only accessed randomly (line 359: Math.random()). No <ul> or table view exists. -->
+
+    <!-- TODO: Missing favorites/bookmarks feature. Users can play tones but cannot save favorites. No UI exists
+         for marking tones as favorites, and no localStorage persistence of favorite IDs. The currentTone variable
+         (line 158) tracks the active tone but favorites array doesn't exist. -->
+
+    <!-- TODO: Missing playback history. The hasPlayed flag (line 159) tracks if any tone was played, but no
+         history of previously played tones is maintained. Users cannot see "Recently Played" or replay specific
+         previous tones. -->
+
+    <!-- TODO: Missing URL routing/deep linking. Users cannot share or bookmark specific tones via URL parameters
+         (e.g., ?tone=123 or #/tone/numb). The application loads random tones only, with no URL state management.
+         The tone metadata (name, file) could enable deep linking but isn't wired to window.location. -->
+
+    <!-- TODO: Missing keyboard shortcuts legend. The application has click handlers but no documented keyboard
+         shortcuts (e.g., Space=play/pause, N=next, R=random). A modal or footer with shortcuts would improve UX. -->
+
     <div class="player">
+        <!-- TODO: Missing ARIA role="region" and aria-label. The player container should have role="region"
+             aria-label="Tone Player" to identify it as a landmark for assistive technology. -->
+
         <div class="song-title" id="songTitle"><i class="bi bi-music-note-beamed"></i>Loading tones...</div>
+        <!-- TODO: Missing aria-label on song-title. Screen readers need context like aria-label="Currently playing"
+             to understand what this element represents. The id="songTitle" implies programmatic access, but
+             accessibility attributes are absent. -->
+        <!-- TODO: Missing loading spinner. The initial text "Loading tones..." appears but no visual spinner exists.
+             The .loading CSS class (line 228) was defined but never applied. -->
+
         <div class="song-file" id="songFile">Please wait</div>
+        <!-- TODO: Missing copyable filename. Users might want to copy the filename for searching elsewhere, but
+             no click-to-copy functionality or copy button exists. The filename is displayed but not interactive. -->
+
         <div class="status" id="status"><i class="bi bi-hourglass-split icon"></i>Loading...</div>
+        <!-- TODO: Missing error display. Parse errors (line 492) show "Invalid tone format" but network errors
+             (line 338) fail silently. Users don't know if a tone file failed to load vs. parse error. -->
+        <!-- TODO: Missing retry mechanism. If tones.json fails (line 338), fallback tones load automatically,
+             but users cannot manually retry loading the full library. No "Retry" button exists. -->
+
         <div class="progress">
             <div class="bar" id="bar"></div>
+            <!-- TODO: Missing waveform visualization. The progress bar is a solid bar, but modern players show
+                 waveform peaks. The note frequency data (line 485: note.frequency) could be visualized with
+                 Canvas API or Web Audio API AnalyserNode, but no visualization exists. -->
         </div>
+
         <div class="controls">
             <button class="btn" onclick="playRandomTone()">
                 <i class="bi bi-shuffle"></i>Random Tone
             </button>
+            <!-- TODO: Missing shuffle toggle. The button always plays random tones, but users might want sequential
+                 or alphabetical playback. No shuffle state toggle (on/off) exists. The icon bi-shuffle implies
+                 this is one mode among several, but no mode selection exists. -->
+            <!-- TODO: Missing aria-label on buttons. Buttons should have aria-label="Play random tone" for screen
+                 readers, especially since icon-only buttons are present elsewhere in the UI. -->
+
             <button class="btn" onclick="stopTone()">
                 <i class="bi bi-stop-fill"></i>Stop
             </button>
+            <!-- TODO: Missing pause vs stop distinction. The stopTone() function (line 380) clears all timeouts
+                 and resets progress, which is "stop". No "pause" functionality exists to resume from current
+                 position. Media players typically distinguish between pause (resume-able) and stop (restart). -->
+            <!-- TODO: Missing previous/next tone buttons. Auto-play next exists (line 524), implying sequential
+                 playback concept, but no manual Previous/Next buttons exist for user control. -->
+            <!-- TODO: Missing repeat/loop toggle. Tones auto-play sequentially, but no option exists to repeat
+                 the current tone. The auto-play mechanism (line 524) always plays a new random tone. -->
         </div>
+
         <div style="margin-top: 15px; font-size: 12px; color: #666;">
             Tone Player - Click anywhere to play
         </div>
+        <!-- TODO: Inline style instead of class. The hint text uses inline styles, inconsistent with rest of
+             CSS. This suggests late addition without proper styling. -->
+        <!-- TODO: Missing hint update after first play. The text "Click anywhere to play" persists after user
+             has played tones. The hasPlayed flag (line 159) could hide this hint after first interaction. -->
+        <!-- TODO: Missing usage instructions/help. The app has RTTTL parsing, multiple icons, and complex state,
+             but no help text, tooltip, or modal explaining features. First-time users may not understand RTTTL
+             format or what the app does. -->
+        <!-- TODO: Missing credits/attribution. The app uses 11,061 tones from unknown sources. No footer credits,
+             license info, or link to tone source repository exists. The large curated collection implies community
+             contribution that should be attributed. -->
     </div>
 
+    <!-- TODO: Missing footer with links. No footer exists for: About, Privacy Policy, GitHub repo link, Report
+         Issue, or external links. The app is deployed publicly but provides no context or support links. -->
+
+    <!-- TODO: Missing settings/preferences panel. No settings gear icon or modal exists for: volume, playback
+         speed, waveform type (sine/square/triangle), theme selection. The Web Audio API supports these features
+         (osc.type line 410) but no UI exposes them. -->
+
+    <!-- TODO: Missing modals/dialogs. No modal system exists for: tone details, RTTTL source view, error messages,
+         confirmation dialogs. All interactions are immediate with no secondary UI layers. -->
+
+    <!-- TODO: Missing toast/notification system. Successful operations (tone loaded, playback complete) have no
+         visual feedback beyond status text. Modern UIs show temporary toast notifications for user actions. -->
+
     <script>
+        // TODO: Missing strict mode. The script should start with 'use strict'; to catch common coding errors
+        // and prevent use of problematic JavaScript features. Modern JavaScript best practice.
+
+        // TODO: Missing module system. The script is inline with global variables, but modern apps use ES6
+        // modules (import/export) for better organization and avoiding global namespace pollution.
+
         let audioContext;
+        // TODO: Missing audioContext cleanup. The audioContext is created once (line 499) but never closed.
+        // If user navigates away and back, multiple contexts may accumulate. No cleanup in window.unload
+        // or beforeunload event exists.
+
         let timeouts = [];
+        // TODO: Missing timeout IDs persistence. The timeouts array manages scheduled notes, but if a tone
+        // fails mid-playback, timeouts may leak. No comprehensive error boundary exists to clean up timeouts
+        // in all failure scenarios beyond stopTone() manual call.
+
         let tonesList = [];
+        // TODO: Missing tonesList indexing/optimization. The array holds 11,061 items accessed randomly, but
+        // no Map or index by name/artist exists for O(1) lookups. Searching requires O(n) linear scan. The
+        // large dataset implies indexed access was needed but never implemented.
+        // TODO: Missing tonesList caching. The list is fetched every page load (line 326), but no localStorage
+        // or sessionStorage caching exists to avoid re-downloading 838KB JSON. The fetch-with-fallback pattern
+        // implies offline support was considered but incomplete.
+        // TODO: Missing tonesList sorting/filtering state. Users cannot sort by name, artist, or date. No
+        // sortBy or filterBy state variables exist. The structured data (name, file) implies this was intended.
+
         let currentTone = '';
+        // TODO: Missing currentToneMetadata. Only RTTTL string is stored, but metadata (name, file, artist,
+        // duration) is lost after playRandomTone() executes. Users cannot query "what am I listening to?" via
+        // API or see full details. No currentToneObject with full metadata exists.
+        // TODO: Missing currentTone validation. The variable stores raw RTTTL strings but no validation ensures
+        // format correctness before assignment. Parse errors are caught later (line 492) instead of at entry.
+
         let hasPlayed = false;
+        // TODO: Missing hasPlayed usage. The flag is set to true after first play (line 377) but never read.
+        // This implies conditional UI rendering (hide instructions, show tips) was planned but not implemented.
+        // TODO: Missing additional playback state flags. No isPaused, isLooping, isShuffle, isMuted flags exist.
+        // These are standard in media players and implied by the control buttons (shuffle icon, stop button).
+
+        // TODO: Missing user preferences object. No settings = { volume: 0.5, speed: 1.0, waveform: 'square' }
+        // object exists despite Web Audio API supporting all these parameters. The hardcoded values (square wave
+        // line 410, fixed gain line 414) imply these were meant to be configurable.
+
+        // TODO: Missing playback history array. No playHistory = [] exists to track played tones for "Recently
+        // Played" feature. The auto-play next mechanism (line 524) generates a sequence that users cannot review.
+
+        // TODO: Missing favorites Set. No favorites = new Set() exists despite large library (11,061 tones)
+        // where users would want to bookmark preferred items. The persistence-ready data structure (tone IDs)
+        // implies this was considered.
+
+        // TODO: Missing error state tracking. No errorCount or lastError variables exist for error reporting
+        // or retry logic. Silent failures (catch {} blocks lines 334, 338, 352) lose error context.
 
         const freq = {
             'c': 261.63, 'c#': 279.07, 'db': 279.07,
@@ -137,8 +376,28 @@
             'a': 440.00, 'a#': 466.16, 'bb': 466.16,
             'b': 493.88
         };
+        // TODO: Missing frequency table for octave 0 rest note. The freq object maps notes to Hz, but no
+        // entry for 'p' (pause) or 'r' (rest) exists. The parseRTTTL function (line 486) explicitly handles
+        // note === 'p' || 'r', but relies on conditional check instead of lookup table entry with freq: 0.
+        // TODO: Missing extended frequency range. Standard RTTTL supports octaves 0-10 (see octave clamping
+        // line 395), but freq table only defines octave 5 (middle octave). The getFreq function (line 397)
+        // computes other octaves via Math.pow(2, octave - 5), which is correct, but table doesn't document
+        // this. A comment explaining octave calculation is missing.
 
         const fallbackTones = [
+            // TODO: Missing fallbackTones documentation. The array serves as offline backup when tones.json
+            // fails to load (line 339), but no comment explains this purpose, selection criteria (why Linkin
+            // Park?), or how to update it. The presence of 38 Linkin Park songs implies this is a curated
+            // subset but documentation is absent.
+            // TODO: Missing fallbackTones refresh strategy. The hardcoded array may become stale compared to
+            // tones.json (last updated 4 months ago per git history). No mechanism exists to sync fallback
+            // with latest popular tones or user favorites.
+            // TODO: Missing fallbackTones compression. The array adds 9KB+ to HTML file size, but could be
+            // compressed or loaded from separate fallback.json file to reduce initial page weight.
+            // TODO: Inconsistent fallbackTones structure. Fallback tones have inline "content" field, but
+            // tones.json entries only have "name" and "file" (loaded via loadToneFile). This dual structure
+            // implies a refactoring was planned but incomplete. See line 361 where both patterns are handled.
+
             {
                 "name": "Jay - Z Feat. Linkin Park - Numb Encore",
                 "file": "Jay - Z Feat. Linkin Park - Numb Encore.txt",
@@ -292,20 +551,79 @@
         ];
 
         async function loadTonesList() {
+            // TODO: Missing loading indicator UI. The function fetches 838KB JSON but doesn't update UI until
+            // complete. No progress bar, spinner animation, or percentage display exists during the 1-3 second
+            // download. The status text "Loading tones..." (HTML line 273) is static.
+
+            // TODO: Missing request timeout. The fetch has no timeout parameter or AbortController. On slow
+            // connections, users wait indefinitely with no feedback or ability to cancel. Modern fetch APIs
+            // support signal: AbortSignal.timeout(10000) for 10s timeout.
+
+            // TODO: Missing retry logic with exponential backoff. If fetch fails (line 338), it immediately
+            // falls back to 38 tones instead of retrying 2-3 times with delays. The fallback implies fetch
+            // failures are expected (network issues) but no retry strategy exists.
+
+            // TODO: Missing cache-first strategy. The fetch has no cache: 'force-cache' or Cache API usage.
+            // Every page load re-downloads 838KB. For a static file updated rarely (4 months ago per git),
+            // aggressive caching would improve performance and reduce bandwidth.
+
+            // TODO: Missing ETag/If-Modified-Since support. The fetch doesn't check if tones.json changed
+            // before downloading. HTTP 304 Not Modified could skip re-downloading unchanged content.
+
+            // TODO: Missing streaming/pagination. All 11,061 tones load at once, blocking UI. No streaming
+            // JSON parser or pagination (load first 100, then lazy-load rest) exists. The large dataset
+            // implies incremental loading was needed.
+
             try {
                 const response = await fetch('tones/tones.json');
+                // TODO: Missing HTTP error handling. The code doesn't check response.ok or response.status.
+                // A 404, 500, or 403 response still attempts to parse as JSON, causing cryptic parse errors
+                // instead of clear "file not found" messages.
+
+                // TODO: Missing response validation. No check for Content-Type: application/json header.
+                // If server returns HTML error page, JSON.parse fails with unhelpful error message.
+
                 tonesList = await response.json();
+                // TODO: Missing JSON schema validation. The parsed JSON is assumed to be array of {name, file}
+                // objects, but no runtime validation exists. Malformed JSON (missing fields, wrong types) causes
+                // errors later when accessing .name or .file. Libraries like Zod or JSON Schema would validate.
+
+                // TODO: Missing duplicate detection. The tones.json has duplicate names (e.g., multiple "James
+                // Bond" entries lines 37, 41 in JSON). No deduplication logic exists, so random selection may
+                // favor duplicates. The structured data implies uniqueness was intended.
+
+                // TODO: Missing metadata extraction. Filenames follow "Artist - Song.txt" pattern, but no
+                // parsing into {artist, title, file} structure occurs. The displayFile (line 370) strips .txt
+                // but doesn't parse artist. Implied by consistent naming convention.
 
                 if (tonesList.length > 0) {
                     document.getElementById('status').innerHTML = '<i class="bi bi-hand-index-fill icon"></i>Click to play random tone';
                     document.getElementById('songTitle').textContent = `${tonesList.length} tones loaded`;
+                    // TODO: Missing formatted number display. "11061 tones loaded" is harder to read than
+                    // "11,061 tones loaded" with toLocaleString(). The large number implies formatting was
+                    // considered for readability.
+
                     document.getElementById('songFile').textContent = 'Ready';
                     document.getElementById('songTitle').classList.add('show');
                     try { await playRandomTone(); } catch { }
+                    // TODO: Missing error logging. The inner try-catch silences playRandomTone() errors. If
+                    // the first auto-play fails, user sees "Ready" status but no sound plays and no error is
+                    // displayed. Silent failure reduces debuggability.
                 } else {
                     throw new Error('No tones found');
+                    // TODO: Missing empty array handling message. The error is thrown but caught immediately
+                    // (line 338), so user never sees "No tones found". A specific UI message for empty JSON
+                    // vs. network failure would improve UX.
                 }
             } catch {
+                // TODO: Missing error differentiation. The catch block handles network errors (fetch failed),
+                // JSON parse errors (invalid JSON), and empty array errors identically. Users can't tell what
+                // went wrong. The error object is discarded instead of logged or displayed.
+
+                // TODO: Missing user notification of fallback. Users don't know they're using degraded mode
+                // (38 tones vs 11,061). A warning banner "Network unavailable, using cached tones" would set
+                // expectations. The fallback is transparent but should be visible.
+
                 tonesList = fallbackTones;
                 document.getElementById('status').innerHTML = '<i class="bi bi-hand-index-fill icon"></i>Click to play';
                 document.getElementById('songTitle').textContent = `${tonesList.length} fallback tones loaded`;
@@ -313,94 +631,328 @@
                 document.getElementById('songTitle').classList.add('show');
                 try { await playRandomTone(); } catch { }
             }
+            // TODO: Missing success event/callback. No custom event like 'tonesLoaded' is dispatched for other
+            // code to react to. If analytics or feature flags needed to know when library loaded, they can't
+            // hook into this moment.
+
+            // TODO: Missing localStorage save. Successfully loaded tonesList could be saved to localStorage
+            // for instant subsequent loads. The 838KB fits in localStorage (5-10MB limit) and would provide
+            // near-instant loads on repeat visits.
         }
 
         async function loadToneFile(filename) {
+            // TODO: Missing parameter validation. The filename comes from tones.json (user-controlled if JSON
+            // is compromised) but no validation exists for path traversal (../../../etc/passwd) or null/undefined.
+            // Should validate filename matches pattern /^[a-zA-Z0-9 ()'-]+\.txt$/.
+
+            // TODO: Missing file caching. Each tone file (30-500 bytes) is fetched fresh every play. No Map
+            // or object cache like { [filename]: content } exists. Users playing same tone repeatedly waste
+            // bandwidth. The random playback implies caching recent N files would help.
+
+            // TODO: Missing progress feedback. For large tone files or slow connections, no loading indicator
+            // shows. Users wait silently between clicking "Random Tone" and hearing sound. A loading state in
+            // status element would improve perceived performance.
+
+            // TODO: Missing Content-Type validation. The function assumes .txt files contain RTTTL text, but
+            // doesn't verify Content-Type: text/plain header. Binary or HTML responses would cause parse errors.
+
             try {
                 const response = await fetch(`tones/${filename}`);
+                // TODO: Missing HTTP status checking. Like loadTonesList, no response.ok check exists. 404s
+                // return null silently (line 656), giving user no feedback about broken file references in
+                // tones.json. Should differentiate 404 (bad data) from 500 (server error).
+
+                // TODO: Missing response size validation. If a .txt file is unexpectedly large (corrupted,
+                // wrong file), no size check exists. A 100MB file would lock browser. Should validate content
+                // length < 10KB (typical RTTTL is 100-500 bytes).
+
                 return await response.text();
+                // TODO: Missing RTTTL format validation. The function returns any text content without checking
+                // if it's valid RTTTL (name:d=,o=,b=:notes). Validation here would catch errors earlier than in
+                // parseRTTTL (line 425) and provide better error messages.
             } catch {
+                // TODO: Missing error logging. The catch returns null silently, losing error context. If file
+                // load fails, playRandomTone (line 362) returns early with no user feedback. Should log error
+                // to console or error tracking service.
+
+                // TODO: Missing retry attempt. Network blips cause permanent failure. A single retry after 1s
+                // delay would improve reliability for transient errors. The fallback pattern in loadTonesList
+                // implies retry was considered.
+
                 return null;
             }
+            // TODO: Missing performance metrics. For 11,061 files, knowing average load time, failure rate,
+            // slowest files would help optimize. No timing instrumentation exists.
         }
 
         async function playRandomTone() {
+            // TODO: Missing playback state check. The function can be called during active playback (user clicks
+            // "Random Tone" while tone is playing). No check for existing playback exists. Should either queue
+            // the request, debounce clicks, or stop current tone first.
+
+            // TODO: Missing smart random selection. Pure random (Math.random) can repeat same tone consecutively.
+            // No "recently played" tracking exists to avoid immediate repeats. A shuffle algorithm (Fisher-Yates)
+            // or recent-N exclusion would improve perceived randomness.
+
             if (tonesList.length === 0) return;
+            // TODO: Missing empty list user feedback. The silent return gives no indication why button click
+            // did nothing. Should show "No tones available" status message.
+
             const randomTone = tonesList[Math.floor(Math.random() * tonesList.length)];
+            // TODO: Missing weighted random selection. All tones have equal probability, but popularity/ratings
+            // could weight selection toward better tones. The large library implies quality varies. No rating
+            // or play count metadata exists to enable this.
 
             let toneContent = randomTone.content ? randomTone.content : await loadToneFile(randomTone.file);
+            // TODO: Missing loading state during fetch. The await blocks UI with no feedback. Status should
+            // show "Loading [tone name]..." during loadToneFile. Currently shows old "Playing..." or "Complete"
+            // status until new tone starts.
+
             if (!toneContent) return;
+            // TODO: Missing null content handling. If loadToneFile returns null (line 658), function returns
+            // silently. User clicked button but nothing happened. Should show error: "Failed to load tone,
+            // try another" and auto-retry with different random tone.
+
             currentTone = toneContent.trim();
+            // TODO: Missing whitespace normalization. Only trim() is called, but RTTTL may have \r\n line endings
+            // or extra spaces. Should use .replace(/\s+/g, '') to normalize all whitespace. Parse errors could
+            // result from malformed whitespace.
 
             const songTitle = document.getElementById('songTitle');
             const songFile = document.getElementById('songFile');
             songTitle.classList.remove('show');
             setTimeout(() => {
                 songTitle.innerHTML = `<i class="bi bi-music-note-beamed"></i> ${randomTone.name}`;
+                // TODO: Missing XSS protection. randomTone.name is inserted via innerHTML without escaping.
+                // If tones.json contains malicious names like "<img src=x onerror=alert(1)>", XSS occurs.
+                // Should use textContent or escape HTML entities. The JSON is trusted now, but threat model
+                // should consider compromised JSON file.
+
                 let displayFile = randomTone.file ? randomTone.file.replace(/\.txt$/i, '') : "inline tone";
+                // TODO: Missing full filename display option. Long filenames are shown in small font (13px)
+                // with no truncation. Very long names (100+ chars exist in collection) may overflow. Should
+                // add title attribute with full name or truncate with ellipsis.
+
                 songFile.textContent = displayFile;
                 songTitle.classList.add('show');
             }, 200);
+            // TODO: Missing animation duration constant. The 200ms delay matches CSS transition (0.5s opacity
+            // transition line 94), but the number is magic. Should define const FADE_DURATION = 200 and reuse.
+            // Changing one without the other breaks animation.
 
             document.getElementById('status').innerHTML = '<i class="bi bi-play-fill icon"></i>Playing...';
             await playTone(currentTone);
             hasPlayed = true;
+            // TODO: Missing hasPlayed usage. The flag is set but never read (see line 351 TODO). Should be
+            // used to hide "Click anywhere to play" hint (HTML line 319) after first interaction.
+
+            // TODO: Missing playback completion callback. After playTone completes, no event fires. Analytics,
+            // history tracking, or "next tone" recommendations can't hook into this moment. The auto-play next
+            // (line 524) is hardcoded instead of using event system.
+
+            // TODO: Missing error boundary. If playTone throws (invalid RTTTL, audio context failure), no catch
+            // exists. Error propagates to outer try-catch (line 608) which silences it. User sees "Playing..."
+            // status but hears nothing, with no error message.
         }
 
         function stopTone() {
+            // TODO: Missing stop confirmation. Users might accidentally click Stop. No "Are you sure?" for long
+            // tones or near end of playback. The immediate action could frustrate users.
+
+            // TODO: Missing pause vs stop functionality. This function is labeled "stop" but acts as hard stop
+            // (clears timeouts, resets progress). No pause state exists to resume from same position. Media
+            // players distinguish pause (resumable) from stop (restart). The timeouts array could track pause
+            // position: pausedAt = Date.now() - startTime.
+
             timeouts.forEach(clearTimeout);
             timeouts = [];
+            // TODO: Missing Web Audio cleanup. Timeouts are cleared, but oscillators/gain nodes created in
+            // playNote (lines 404-410) are not explicitly stopped or disconnected. While they auto-cleanup at
+            // scheduled stop time, interrupting mid-note leaves dangling audio nodes until GC. Should track
+            // active oscillators and call osc.stop(0) immediately.
+
             document.getElementById('bar').style.width = '0%';
             document.getElementById('status').innerHTML = '<i class="bi bi-stop-fill icon"></i>Stopped';
+            // TODO: Missing stop event. No callback or custom event fires when playback stops. If UI needs to
+            // react (re-enable buttons, hide visualizer), it can't hook into this moment. The playTone auto-play
+            // next (line 524) won't fire after manual stop, but nothing tracks WHY playback ended (user stop vs
+            // completion vs error).
+
+            // TODO: Missing undo stop. Users who accidentally stop have no way to resume or restart the same tone.
+            // No "Resume" or "Restart" button appears after stop. The currentTone variable holds RTTTL string
+            // but no UI exposes replaying it.
         }
 
         function getFreq(note, octave) {
+            // TODO: Missing JSDoc comment. The function computes frequency from note name and octave using A440
+            // standard and equal temperament, but no documentation explains this. Future maintainers may not
+            // understand why Math.pow(2, octave - 5) is used. Should document: "Returns frequency in Hz using
+            // A440 standard with equal temperament tuning. Base frequencies are octave 5, other octaves scale
+            // by doubling/halving per octave."
+
             if (!note) return 0;
+            // TODO: Missing rest note constant. The function returns 0 for falsy notes, but rests ('p', 'r')
+            // are handled before this function is called (line 486). Should define const REST_FREQUENCY = 0 for
+            // clarity instead of magic number 0.
 
             note = note.toLowerCase();
+            // TODO: Missing note validation. The function accepts any string, but only 12 notes are valid
+            // (c, c#, d, d#, e, f, f#, g, g#, a, a#, b). Invalid notes like 'x' or 'h' return 0 silently.
+            // Should throw error or log warning for invalid notes to catch RTTTL typos.
 
             const base = freq[note];
             if (!base) return 0;
+            // TODO: Missing enharmonic equivalents. The freq table includes c#/db, d#/eb, etc., but not f/e#,
+            // b#/c, cb/b. While uncommon in RTTTL, full music notation support would include these. The partial
+            // enharmonic coverage implies complete coverage was intended.
 
             octave = Math.max(0, Math.min(10, octave));
+            // TODO: Missing octave range documentation. The clamp to 0-10 matches RTTTL spec, but no comment
+            // explains why. Human hearing is ~20Hz-20kHz, so octaves -1 to 10 are practical. The arbitrary limits
+            // should be documented with rationale.
 
             return base * Math.pow(2, octave - 5);
+            // TODO: Missing frequency range validation. The function can return extreme frequencies outside
+            // human hearing (octave 0 C = 8.18Hz, octave 10 B = 31609Hz). The playNote function clamps to
+            // 20-20000Hz (line 409), but validation here would prevent computation of unhearable frequencies.
+
+            // TODO: Missing microtonal/pitch bend support. RTTTL is fixed-pitch, but modern players support
+            // pitch bend or microtones. No cents offset parameter exists (e.g., getFreq('a', 5, -50) for A
+            // flat 50 cents). The extensible API design implies this was considered.
+
+            // TODO: Missing alternative tuning systems. The function hardcodes A440 (line 376: 'a': 440.00),
+            // but some music uses A432 or historical tunings. No configurable concert pitch parameter exists.
+            // The precise frequency table implies tuning awareness but no flexibility.
         }
 
         function playNote(frequency, duration) {
+            // TODO: Missing volume parameter. The function uses fixed gain (0 to 1), but users cannot control
+            // volume. Should accept volume parameter (0-1) to scale gain envelope. The gain node infrastructure
+            // (line 835) supports this but no API exposes it. Implied by typical media player features.
+
+            // TODO: Missing waveform type parameter. The osc.type is hardcoded to 'square' (line 840), but
+            // Web Audio API supports 'sine', 'sawtooth', 'triangle'. No parameter exists to vary timbre. The
+            // explicit type assignment implies this was meant to be configurable. Different waveforms create
+            // different tone qualities (sine=pure, square=harsh, triangle=mellow).
+
             if (!frequency || !audioContext) return;
+            // TODO: Missing silent return logging. If audioContext is null (shouldn't happen after first play,
+            // but possible if context fails to create), the function silently fails. Should warn user "Audio
+            // initialization failed, check browser permissions". The guard clause hides important errors.
+
+            // TODO: Missing frequency === 0 special case. Rests (frequency = 0, from line 486) skip this function,
+            // but the guard would also skip them. Should explicitly check frequency === 0 vs !frequency (null/NaN)
+            // to differentiate intentional rests from errors.
 
             try {
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
                 osc.connect(gain);
                 gain.connect(audioContext.destination);
+                // TODO: Missing audio routing options. The chain is fixed: osc → gain → destination. No support
+                // for effects (reverb, delay, filter, compressor). Web Audio API supports complex graphs, but
+                // this player has minimal routing. The modular connection pattern implies effects were considered
+                // but not implemented.
+
+                // TODO: Missing stereo panning. All notes play center-panned. No StereoPannerNode exists. Musical
+                // applications often pan notes for spatial effect. The mono output is functional but basic.
 
                 osc.frequency.value = Math.max(20, Math.min(20000, frequency));
+                // TODO: Missing frequency clamping constants. The magic numbers 20 and 20000 represent human
+                // hearing range, but should be named: const MIN_AUDIBLE_FREQ = 20; const MAX_AUDIBLE_FREQ = 20000;
+                // This improves code readability and allows easy adjustment (some speakers can't produce <50Hz).
+
+                // TODO: Missing vibrato/pitch modulation. Oscillator frequency is static for duration. No LFO
+                // (low-frequency oscillator) modulates osc.frequency for vibrato effect. The precise frequency
+                // control implies modulation was considered but not added.
+
                 osc.type = 'square';
+                // TODO: Missing waveform configuration from settings. This hardcoded value should read from a
+                // settings object (see line 356 TODO). The explicit assignment implies it was meant to be variable.
+
+                // TODO: Missing PeriodicWave support. Web Audio API allows custom waveforms via createPeriodicWave,
+                // enabling authentic chip-tune sounds (NES, Game Boy). The retro ringtone context implies this
+                // would be valuable, but only basic waveforms are supported.
 
                 const now = audioContext.currentTime;
                 gain.gain.setValueAtTime(0, now);
                 gain.gain.linearRampToValueAtTime(1, now + 0.0003);
                 gain.gain.linearRampToValueAtTime(1, now + duration - 0.003);
                 gain.gain.linearRampToValueAtTime(0, now + duration);
+                // TODO: Missing ADSR envelope configuration. The envelope is hardcoded: 0.3ms attack, full
+                // sustain, 3ms release (no decay). Classic ADSR (Attack-Decay-Sustain-Release) synthesis would
+                // allow: Attack=5ms, Decay=20ms, Sustain=0.7, Release=50ms for more musical sounds. The precise
+                // timing values imply envelope shaping was considered, but only click-reduction (not musicality)
+                // was implemented.
+
+                // TODO: Missing velocity/dynamics support. All notes play at full gain (1.0). MIDI-style velocity
+                // (0-127) would vary note loudness for expression. The gain node supports this (linearRampToValueAtTime
+                // to velocity/127) but no velocity data exists in RTTTL format or function parameters.
+
+                // TODO: Missing envelope timing validation. If duration < 0.0033 (3.3ms), the release ramp
+                // starts before attack completes (attack 0.3ms + release 3ms = 3.3ms min). Should validate
+                // duration >= 0.004 or adjust envelope proportionally. Short notes may click or distort.
 
                 osc.start(now);
                 osc.stop(now + duration);
+                // TODO: Missing oscillator reference tracking. The oscillator is created and scheduled but not
+                // stored. If stopTone() is called mid-note, this oscillator continues until scheduled stop time.
+                // Should push osc to array: activeOscillators.push(osc), then stopTone() can immediately stop all.
+                // See stopTone line 769 TODO.
+
+                // TODO: Missing duration bounds checking. Extremely long durations (1000s seconds from malformed
+                // RTTTL) would schedule far-future stop times, potentially causing audio context issues. Should
+                // validate duration < 60 seconds (no ringtone note lasts 1 minute).
+
+                // TODO: Missing note event callbacks. No onended event listener exists on oscillator to track
+                // when individual notes complete. If debugging or visualizing per-note timing is needed, no hooks
+                // exist. The scheduled timing (line 855) is trusted to complete without verification.
             } catch (error) {
                 console.warn('Error playing note:', error);
+                // TODO: Missing error recovery. The catch logs to console but user sees/hears nothing. Should
+                // increment error counter and show "Audio error" status after N failures. Single note failures
+                // are silent, but repeated failures indicate serious problem (no audio output).
+
+                // TODO: Missing error details in user message. The error object may contain useful context
+                // (NotAllowedError=autoplay blocked, InvalidStateError=context closed), but only generic warning
+                // is logged. Should inspect error.name and provide specific user guidance.
             }
+            // TODO: Missing performance monitoring. Creating oscillator/gain nodes 100+ times per tone (one per
+            // note) may be expensive. No timing instrumentation exists to detect performance bottlenecks. Should
+            // log: const start = performance.now(); ... console.debug('playNote took', performance.now() - start).
         }
 
         function parseRTTTL(rtttl) {
+            // TODO: Missing RTTTL format documentation. The parser handles RTTTL spec (name:d=,o=,b=:notes) but
+            // no comment explains the format. New developers won't understand what "d=4,o=5,b=120" means without
+            // external research. Should document: "Parses RTTTL (Ring Tone Text Transfer Language) format:
+            // name:d=defaultDuration,o=defaultOctave,b=beatsPerMinute:note1,note2,..."
+
+            // TODO: Missing input sanitization. The rtttl string could be extremely large (DoS attack) or contain
+            // special characters. No length check or character whitelist exists. Should validate rtttl.length < 10000
+            // (typical RTTTL is 100-2000 chars) to prevent memory/CPU exhaustion.
+
             try {
                 const parts = rtttl.split(':');
                 if (parts.length < 3) {
                     throw new Error('Invalid RTTTL format');
                 }
+                // TODO: Missing parts.length > 3 handling. RTTTL with colons in the name (rare but possible) would
+                // create extra parts. Current code ignores parts[3+], but should either error or rejoin: name =
+                // parts.slice(0, -2).join(':') to handle "Song:Subtitle" names.
 
                 const [name, defaults, notes] = parts;
+                // TODO: Missing name extraction/usage. The name is parsed but never used or returned. The calling
+                // code (playRandomTone) already has tone name from JSON. If parsing standalone RTTTL strings (user
+                // input, future feature), name should be returned. The extraction implies it was meant to be used.
+
+                // TODO: Missing defaults validation. The defaults string could be malformed ("d=abc", "x=5", missing
+                // values). Current code silently ignores invalid entries but should warn user "Malformed defaults"
+                // for debugging.
+
                 let bpm = 120, defDur = 4, defOct = 5;
+                // TODO: Missing default value constants. Magic numbers 120, 4, 5 are RTTTL spec defaults but should
+                // be named: const DEFAULT_BPM = 120; const DEFAULT_DURATION = 4; const DEFAULT_OCTAVE = 5; for clarity.
 
                 defaults.split(',').forEach(p => {
                     const trimmed = p.trim();
@@ -410,18 +962,40 @@
                         const value = parseInt(v.trim());
                         if (!isNaN(value)) {
                             if (key === 'b') bpm = Math.max(1, value);
+                            // TODO: Missing BPM upper bound. bpm is clamped >= 1 but no upper limit. BPM of 100,000
+                            // would create 0.0006s per quarter note, likely causing audio glitches or overflow. Should
+                            // clamp: Math.min(1000, Math.max(1, value)) for reasonable range 1-1000 BPM.
+
                             if (key === 'd') defDur = Math.max(1, value);
+                            // TODO: Missing duration value validation. RTTTL supports 1,2,4,8,16,32 (powers of 2), but
+                            // code accepts any integer >= 1. Duration=3 or 7 would be invalid but are processed. Should
+                            // validate: [1,2,4,8,16,32].includes(value) and reject invalid durations.
+
                             if (key === 'o') defOct = Math.max(0, Math.min(10, value));
                         }
+                        // TODO: Missing unrecognized key warning. If key === 'x' (typo or extension), it's silently
+                        // ignored. Should log warning "Unknown RTTTL parameter: x" to help debug typos.
                     }
+                    // TODO: Missing malformed parameter handling. If trimmed === "b120" (missing =), it's silently
+                    // ignored. Should warn "Malformed parameter: expected key=value format".
                 });
 
                 const result = [];
                 const noteTokens = notes.split(',');
+                // TODO: Missing empty notes section handling. If notes === "" (empty), noteTokens = [""], and loop
+                // processes one empty token. Should check notes.trim() && notes.split(',') or validate result.length > 0
+                // after parsing.
+
+                // TODO: Missing maximum note count validation. A malicious RTTTL with 100,000 notes would create huge
+                // result array, causing memory issues. Should limit: if (noteTokens.length > 1000) throw new Error('Too
+                // many notes'). Typical ringtones have 50-300 notes.
 
                 noteTokens.forEach(token => {
                     token = token.trim();
                     if (!token) return;
+                    // TODO: Missing whitespace handling in tokens. While trim() removes leading/trailing whitespace,
+                    // "4 c # 5" (spaces in note) would fail regex matching. Should normalize: token.replace(/\s+/g, '')
+                    // before parsing.
 
                     let dur = defDur, oct = defOct, note = '';
                     let remainingToken = token;
@@ -431,6 +1005,9 @@
                         dur = parseInt(durMatch[1]);
                         remainingToken = remainingToken.slice(durMatch[1].length);
                     }
+                    // TODO: Missing duration value validation (per-note). Like default duration, per-note durations
+                    // should be powers of 2. Duration 1,2,4,8,16,32 are valid, but 3,5,7 are not. Should validate
+                    // and reject/warn on invalid values.
 
                     const noteMatch = remainingToken.match(/^([a-gpr]#?b?)/i);
                     if (noteMatch) {
@@ -438,73 +1015,259 @@
                         remainingToken = remainingToken.slice(noteMatch[1].length);
 
                         if (note === 'r') note = 'p';
+                        // TODO: Missing note normalization documentation. 'r' (rest) is converted to 'p' (pause), but
+                        // no comment explains why both exist or what difference is. RTTTL spec uses both interchangeably,
+                        // should document: "RTTTL uses 'p' and 'r' for rests/pauses, normalize to 'p'".
                     }
+                    // TODO: Missing note validation. If no noteMatch found (typo like "4x5"), note remains empty string
+                    // and getFreq returns 0 (rest). This masks typos. Should warn "Invalid note in token: 4x5" instead
+                    // of silently treating as rest.
 
                     const octMatch = remainingToken.match(/^(\d+)/);
                     if (octMatch) {
                         oct = parseInt(octMatch[1]);
                         remainingToken = remainingToken.slice(octMatch[1].length);
                     }
+                    // TODO: Missing octave clamping (per-note). Default octave is clamped to 0-10 (line 978), but
+                    // per-note octaves are not. "c99" would set oct=99, causing getFreq to return extreme frequency.
+                    // Should clamp: oct = Math.max(0, Math.min(10, oct)).
 
                     const dots = (remainingToken.match(/\./g) || []).length;
+                    // TODO: Missing dots limit validation. RTTTL typically uses 0-2 dots (dotted/double-dotted), but
+                    // "4c5........" (20 dots) would multiply duration by 1.5^20 = 3325x, creating absurdly long note
+                    // (hours). Should limit: Math.min(3, dots) or warn "Excessive dots: " + dots.
+
+                    // TODO: Missing remainingToken validation. After parsing duration, note, octave, dots, remainingToken
+                    // should be empty or only dots. If remainingToken === "xyz", it means token had unparseable suffix.
+                    // Should warn "Unexpected characters in note token: xyz" to catch malformed RTTTL.
 
                     let duration = (60 / bpm) * (4 / dur);
+                    // TODO: Missing duration calculation explanation. The formula (60/bpm)*(4/dur) converts BPM and
+                    // duration to seconds, but no comment explains why. Should document: "Convert to seconds: 60/bpm
+                    // gives seconds per beat (quarter note), multiply by 4/dur to scale by note length (4=quarter,
+                    // 8=eighth, etc.)".
+
                     for (let i = 0; i < dots; i++) {
                         duration *= 1.5;
                     }
+                    // TODO: Missing dots calculation explanation. Each dot extends duration by 50% (1.5x), but the
+                    // musical concept isn't documented. Should explain: "Each dot adds half the previous duration: one
+                    // dot = 1.5x, two dots = 1.5*1.5 = 2.25x, etc."
 
                     const frequency = (note === 'p' || note === 'r') ? 0 : getFreq(note, oct);
+                    // TODO: Missing redundant 'r' check. Earlier code normalized r to p (line 1001), so checking note
+                    // === 'r' again is unnecessary. Should simplify to: note === 'p' only, or document why 'r' is kept.
 
                     result.push({ frequency, duration, note, octave: oct });
+                    // TODO: Missing parsed metadata. The returned object includes note and octave for debugging, but
+                    // not the original token or position. If parse error occurs later (invalid frequency), developers
+                    // can't identify which token caused it. Should add: token: originalToken, index: i for traceability.
                 });
 
                 return result;
+                // TODO: Missing result validation. Empty result array (no valid notes parsed) is returned without
+                // error. Calling code (playTone) checks result.length === 0 and shows error (line 504), but validation
+                // here would provide better context: "No valid notes found in RTTTL string".
+
+                // TODO: Missing performance warning for large tones. If result.length > 500 (very long ringtone),
+                // no warning exists. Long tones may cause performance issues (many setTimeout calls). Should log
+                // "Warning: tone has N notes, may impact performance" for large N.
             } catch (error) {
                 console.error('Error parsing RTTTL:', error);
+                // TODO: Missing detailed error messages. Generic "Error parsing RTTTL" doesn't help users fix invalid
+                // RTTTL. Should catch specific errors (split failed, invalid format) and provide actionable messages:
+                // "RTTTL must have format 'name:defaults:notes', found X colons" or "Invalid BPM value: abc".
+
                 return [];
+                // TODO: Missing partial parse recovery. If one note token fails, entire parse fails. Could skip invalid
+                // tokens and continue parsing rest: try { parseNote(token) } catch { continue; }. This would allow
+                // playing tones with a few typos instead of complete failure.
             }
+            // TODO: Missing parsed RTTTL caching. Parsing is expensive (regex, loops, string manipulation) and repeated
+            // for same tone on replay. Could cache: const parseCache = new Map(); if (parseCache.has(rtttl)) return
+            // parseCache.get(rtttl). The currentTone variable implies replay is possible, so caching makes sense.
         }
 
         async function playTone(toneString) {
+            // TODO: Missing playback state management. The function can be called while another tone is playing
+            // (via auto-play next). No isPlaying flag exists to prevent concurrent playback. Multiple tones could
+            // overlap, causing audio chaos. Should check: if (isPlaying) stopTone(); before starting new playback.
+
             if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // TODO: Missing AudioContext creation error handling. The constructor can fail (unsupported browser,
+            // permissions denied, audio hardware issues), but no try-catch exists. Should catch and show: "Audio
+            // not supported in your browser" or "Audio initialization failed". The || fallback for webkitAudioContext
+            // implies browser compatibility was considered, but error handling is incomplete.
+
+            // TODO: Missing AudioContext state persistence. Creating new context on every call wastes resources.
+            // Should check: if (!audioContext) { create once } instead of creating multiple times. The if (!audioContext)
+            // guard exists but lacks else case to reuse existing context.
+
             await audioContext.resume();
+            // TODO: Missing resume() error handling. The await can fail (context closed, permissions revoked), but
+            // no try-catch exists. Users would see unhandled promise rejection in console with no UI feedback. Should
+            // catch and retry or show "Audio playback blocked, click to enable" message.
+
+            // TODO: Missing autoplay policy handling. Modern browsers block autoplay until user interaction. The
+            // resume() call may fail on first auto-play (line 608: try { await playRandomTone(); }). Should detect:
+            // if (e.name === 'NotAllowedError') show "Click anywhere to enable audio" prompt instead of silent failure.
+
             stopTone();
+            // TODO: Missing stopTone() error handling. While unlikely, stopTone() could throw (clearTimeout fails,
+            // DOM access fails). Should wrap in try-catch to prevent interrupting new tone playback.
 
             const notes = parseRTTTL(toneString);
             if (notes.length === 0) {
                 document.getElementById('status').innerHTML = '<i class="bi bi-exclamation-triangle-fill icon"></i>Invalid tone format';
                 return;
+                // TODO: Missing error recovery after parse failure. The function returns, leaving user with "Invalid
+                // tone format" message and no way to recover. Should auto-skip to next tone after 2s: setTimeout(() =>
+                // playRandomTone(), 2000) to avoid dead-end state.
             }
 
             const noteSeparation = 0.015;
+            // TODO: Missing noteSeparation configuration. The 15ms gap between notes is hardcoded, but should be
+            // adjustable. Faster/slower note articulation changes musical feel. The precise value (0.015) implies
+            // experimentation, so making it configurable makes sense. Could be user preference or per-tone metadata.
+
+            // TODO: Missing noteSeparation explanation. No comment explains why 15ms is chosen. Too short causes notes
+            // to blur together, too long sounds choppy. Should document: "15ms gap prevents notes from blending while
+            // maintaining smooth melody flow".
+
             const total = notes.reduce((s, n) => s + n.duration + noteSeparation, 0);
+            // TODO: Missing total duration display. The total time is computed for progress bar but never shown to
+            // user. Should display "0:00 / 1:23" below progress bar (see line 141 TODO). The calculation exists but
+            // the UI doesn't expose it.
+
+            // TODO: Missing total duration validation. Extremely long tones (hours from malformed RTTTL) would compute
+            // huge total, causing progress bar updates to malfunction. Should validate: if (total > 300) warn "Tone
+            // exceeds 5 minutes, may cause performance issues". Typical ringtones are 10-60 seconds.
+
             let time = 0;
+            // TODO: Missing playback start time tracking. The time variable tracks scheduling time, but no
+            // playbackStartTime = Date.now() exists to track real wall-clock time. This prevents implementing pause/
+            // resume (can't compute elapsed time) or real-time progress updates (see pause TODO line 762).
 
             notes.forEach((note, i) => {
+                // TODO: Missing forEach -> for loop optimization. Array.forEach creates function closure for each note,
+                // which may impact performance for long tones (500+ notes). Traditional for loop would be faster:
+                // for (let i = 0; i < notes.length; i++). The modern forEach is readable but less performant.
+
                 const timeout = setTimeout(() => {
                     if (note.frequency > 0) {
                         playNote(note.frequency, note.duration);
                     }
+                    // TODO: Missing rest duration visualization. Rests (frequency === 0) don't call playNote, but
+                    // progress bar still advances. Users can't distinguish rest from note in visualization. Could
+                    // add class="rest" to bar during rests to show different color/pattern.
+
                     const progress = ((time + note.duration + noteSeparation) / total) * 100;
                     document.getElementById('bar').style.width = progress + '%';
+                    // TODO: Missing progress precision. The progress percentage can have many decimals (73.48291%), but
+                    // CSS doesn't need that precision. Should round: Math.floor(progress) + '%' for cleaner DOM and
+                    // slightly better performance.
+
+                    // TODO: Missing current note highlighting. No UI shows which note is currently playing. Advanced
+                    // players show note name ("Playing: C5") or visualize on staff. The note.note and note.octave data
+                    // exists but isn't displayed during playback.
 
                     if (i === notes.length - 1) {
+                        // TODO: Missing last note detection. Checking i === notes.length - 1 assumes forEach processes
+                        // in order and notes array doesn't change. While safe here, more robust: if (i === notes.length - 1
+                        // && timeouts.length === notes.length) ensures all timeouts were scheduled.
+
                         setTimeout(() => {
                             document.getElementById('status').innerHTML = '<i class="bi bi-check-circle-fill icon"></i>Complete';
                             setTimeout(playRandomTone, 2000);
+                            // TODO: Missing auto-play toggle. The 2s auto-play next is hardcoded with no user control.
+                            // Should check: if (settings.autoPlay) setTimeout(...) to allow disabling auto-play. The
+                            // automatic behavior implies this was meant to be optional but UI toggle doesn't exist.
+
+                            // TODO: Missing auto-play delay configuration. The 2000ms (2s) delay is hardcoded. Users
+                            // might prefer instant next (0ms) or longer pause (5s). Should be configurable: settings.
+                            // autoPlayDelay. The specific value implies experimentation but no customization option.
+
+                            // TODO: Missing completion callback/event. No custom event fires when tone completes. If
+                            // analytics need to track play count, or "next tone" recommendations need to update, they
+                            // can't hook into this moment. Should dispatch: window.dispatchEvent(new CustomEvent(
+                            // 'toneComplete', { detail: { toneString, duration: total }})).
                         }, note.duration * 1000);
+                        // TODO: Missing nested setTimeout cleanup. This setTimeout is not tracked in timeouts array.
+                        // If stopTone() is called after tone completes but before 2s auto-play, the auto-play still
+                        // fires. Should push this timeout to array: timeouts.push(setTimeout(...)) for proper cleanup.
                     }
                 }, time * 1000);
 
                 timeouts.push(timeout);
                 time += note.duration + noteSeparation;
             });
+            // TODO: Missing playback started event. No callback or event fires when playback begins. UI could show
+            // "Now Playing" animation, disable controls, or update history, but no hook exists. Should dispatch:
+            // window.dispatchEvent(new CustomEvent('toneStarted', { detail: { toneString, noteCount: notes.length }})).
+
+            // TODO: Missing playback error boundary. If any setTimeout fails (browser throttles background tabs,
+            // system overload), no error recovery exists. Playback could stall with no user feedback. Should wrap
+            // setTimeout content in try-catch to detect and recover from individual note failures.
+
+            // TODO: Missing playback performance monitoring. No timing metrics track if playback is falling behind
+            // schedule. On slow devices, setTimeout may fire late, causing rhythm drift. Should track: const actualTime =
+            // (Date.now() - startTime) / 1000 and compare to scheduled time to detect drift > 50ms.
         }
 
         window.addEventListener('load', loadTonesList);
+        // TODO: Missing multiple load listener. If multiple scripts register 'load' listeners, order is undefined.
+        // Should use DOMContentLoaded instead of load for faster initial execution (load waits for images/resources).
+        // The current load event implies page resources are needed, but only tones.json fetch is required.
+
+        // TODO: Missing error handling for loadTonesList. If loadTonesList throws unhandled error, the page breaks
+        // with no recovery. Should wrap: window.addEventListener('load', async () => { try { await loadTonesList(); }
+        // catch (e) { show error UI } }); to catch initialization failures.
+
         document.addEventListener('click', (e) => {
             if (!e.target.matches('button')) playRandomTone();
         });
+        // TODO: Missing click handler specificity. The global click handler fires for all clicks except buttons.
+        // Clicking song title, filename, status, progress bar all trigger playRandomTone(), which may be unexpected.
+        // Should limit to: e.target.closest('.player') to only trigger within player area, or better: add explicit
+        // click handler to specific element instead of document-wide listener.
+
+        // TODO: Missing keyboard event handlers. No keydown listener exists for Space (play/pause), Arrow keys
+        // (prev/next), R (random), S (stop), or other common shortcuts. The click-anywhere pattern implies keyboard
+        // support was overlooked but should be added for accessibility. See line 235 TODO about keyboard shortcuts.
+
+        // TODO: Missing touch event handlers. Mobile users may experience delays with click events (300ms delay on
+        // older browsers). Should add touchend handler for instant response: document.addEventListener('touchend',
+        // (e) => { if (!e.target.matches('button')) { e.preventDefault(); playRandomTone(); } }); to improve mobile UX.
+
+        // TODO: Missing event delegation optimization. The click listener is document-level but only handles .player
+        // clicks. Should use event delegation on .player element: document.querySelector('.player').addEventListener(
+        // 'click', ...) to avoid evaluating every document click. More efficient and semantically correct.
+
+        // TODO: Missing pointer event support. Modern browsers support pointer events (mouse, touch, pen unified).
+        // Should use: document.addEventListener('pointerdown', ...) instead of separate click/touch handlers for
+        // better cross-device support and future compatibility.
+
+        // TODO: Missing focus trap for accessibility. Keyboard users tabbing through page can accidentally trigger
+        // click listener on focused elements. Should check: if (document.activeElement === e.target) return; to
+        // prevent keyboard navigation from playing tones. Or better: remove document-wide listener entirely.
+
+        // TODO: Missing double-click prevention. Rapid clicks trigger playRandomTone() multiple times, starting
+        // overlapping playback (stopTone() in playTone handles this, but wastes cycles). Should debounce: let
+        // lastClick = 0; if (Date.now() - lastClick < 500) return; lastClick = Date.now(); to prevent accidental
+        // double-triggers.
+
+        // TODO: Missing unload cleanup. No window.addEventListener('beforeunload', ...) exists to close audioContext,
+        // clear timeouts, or save state. Memory leaks may occur if context isn't closed. Should add cleanup: window.
+        // addEventListener('beforeunload', () => { stopTone(); if (audioContext) audioContext.close(); }); for proper
+        // resource management.
+
+        // TODO: Missing visibility change handling. When tab goes to background, browsers may throttle setTimeout,
+        // causing audio glitches. Should detect: document.addEventListener('visibilitychange', () => { if (document.
+        // hidden) stopTone(); }); to gracefully pause playback when user switches tabs instead of letting it glitch.
+
+        // TODO: Missing online/offline detection. The app uses network resources (tones.json, .txt files) but doesn't
+        // detect when user goes offline. Should add: window.addEventListener('offline', () => { show "Offline mode" });
+        // window.addEventListener('online', () => { retry failed loads }); to handle network changes gracefully.
     </script>
 </body>
 
