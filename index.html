@@ -654,8 +654,21 @@
             } catch {}
         }
 
-        // ── Parse Artist/Title from tone name ──
-        function parseToneName(name) {
+        // ── Parse Artist/Title from tone data ──
+        // Prefer filename over name field since name is often a truncated RTTTL label
+        function parseToneName(name, file) {
+            // Try the filename first (always has "Artist - Song.txt" format)
+            if (file) {
+                const clean = file.replace(/\.txt$/i, '').trim();
+                const dashIdx = clean.indexOf(' - ');
+                if (dashIdx > 0) {
+                    return {
+                        artist: clean.substring(0, dashIdx).trim(),
+                        title: clean.substring(dashIdx + 3).trim()
+                    };
+                }
+            }
+            // Fallback to the name field
             const dashIdx = name.indexOf(' - ');
             if (dashIdx > 0) {
                 return {
@@ -670,7 +683,7 @@
         function populateArtistFilter() {
             const artists = new Map();
             tonesList.forEach(t => {
-                const { artist } = parseToneName(t.name);
+                const { artist } = parseToneName(t.name, t.file);
                 const key = artist.toLowerCase();
                 if (!artists.has(key)) {
                     artists.set(key, { name: artist, count: 0 });
@@ -696,10 +709,11 @@
 
             filteredTones = tonesList.filter(t => {
                 // Search filter
-                if (query && !t.name.toLowerCase().includes(query)) return false;
+                const displayName = (t.file ? t.file.replace(/\.txt$/i, '').trim() : t.name).toLowerCase();
+                if (query && !displayName.includes(query)) return false;
                 // Artist filter
                 if (artistVal) {
-                    const { artist } = parseToneName(t.name);
+                    const { artist } = parseToneName(t.name, t.file);
                     if (artist !== artistVal) return false;
                 }
                 // Favorites filter
@@ -714,11 +728,11 @@
             filteredTones.sort((a, b) => {
                 let va, vb;
                 if (sortField === 'artist') {
-                    va = parseToneName(a.name).artist.toLowerCase();
-                    vb = parseToneName(b.name).artist.toLowerCase();
+                    va = parseToneName(a.name, a.file).artist.toLowerCase();
+                    vb = parseToneName(b.name, b.file).artist.toLowerCase();
                 } else {
-                    va = a.name.toLowerCase();
-                    vb = b.name.toLowerCase();
+                    va = (a.file ? a.file.replace(/\.txt$/i, '').trim() : a.name).toLowerCase();
+                    vb = (b.file ? b.file.replace(/\.txt$/i, '').trim() : b.name).toLowerCase();
                 }
                 const cmp = va.localeCompare(vb);
                 return sortDir === 'desc' ? -cmp : cmp;
@@ -742,7 +756,7 @@
                 fragment.appendChild(empty);
             } else {
                 filteredTones.forEach((tone, idx) => {
-                    const { artist, title } = parseToneName(tone.name);
+                    const { artist, title } = parseToneName(tone.name, tone.file);
                     const isFav = prefs.favorites.includes(tone.name);
                     const isCurrent = currentToneMeta && tone.name === currentToneMeta.name;
 
@@ -994,7 +1008,7 @@
             currentToneIndex = indexInFiltered;
 
             // Update now-playing display
-            const { artist, title } = parseToneName(tone.name);
+            const { artist, title } = parseToneName(tone.name, tone.file);
             dom.songTitle.classList.remove('show');
             setTimeout(() => {
                 dom.songTitle.textContent = title;
